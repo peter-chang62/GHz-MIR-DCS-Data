@@ -9,7 +9,10 @@ clipboard_and_style_sheet.style_sheet()
 normalize = lambda vec: vec / np.max(abs(vec))
 
 # get the points per interferogram
-path = r"G:\.shortcut-targets-by-id\1x47gJys_dhP6gubqgzefkAm5X9gEfoKP\GHz MIR DCS Data\210921\interferogram_8.asc"
+google_drive_pop = "/run/user/1000/gvfs/google-drive:host=colorado.edu," \
+               "user=pech6593/GVfsSharedWithMe/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/1-eXKnqx5amy8xxc5lTGYaCJfTintyXV6/"
+file = "interferogram_1.asc"
+path = google_drive_pop + file
 ifg = gp.IFG(path, read_chunk=True, chunksize=2e6)
 npts = ifg.ppifg()
 
