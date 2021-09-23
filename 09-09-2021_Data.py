@@ -16,11 +16,12 @@ def plot_section(arr, npts, npts_sec):
         plt.plot(arr[npts // 2 - npts_sec:npts // 2 + npts_sec])
 
 
+# %%
 # get the points per interferogram
 google_drive_path = "G:/.shortcut-targets-by-id" \
-                    "/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/GHz MIR DCS" \
-                    "Data/210921/"
-file = "interferogram_8.asc"
+                    "/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/GHz MIR DCS " \
+                    "Data/210923/"
+file = "ifg_nazanin_attenuated.asc"
 path = google_drive_path + file
 
 ifg = gp.IFG(path, read_chunk=True, chunksize=2e6)
@@ -29,9 +30,11 @@ npts = ifg.ppifg()
 # using ppifg to get the data
 it = ifg.get_iter(chunksize=npts, offset=npts // 2)
 
-# pull 100 interferograms
+# %%
+# pull 50 interferograms
 IFG = []
-for n in range(100):
+for n in range(50):
+    print(n)
     IFG.append(next(it).values)
 
 # pull all the interferograms
@@ -43,6 +46,7 @@ for n in range(100):
 # only average 10 interferograms
 # IFG = IFG[0:10]
 
+# %%
 IFG = np.array(IFG)
 Y = IFG[:, :, 1]
 Y = (Y.T - np.mean(Y, 1)).T
@@ -61,6 +65,7 @@ corr = corr.real
 best = np.argmax(corr, 1) - len(ref[0]) // 2
 shift = best * len(Sec[0]) / len(ref[0])
 
+# %%
 # shift using fft
 FT = np.fft.fft(np.fft.fftshift(Y, axes=1), axis=1)
 f = np.fft.fftfreq(len(FT[0]))
@@ -75,6 +80,7 @@ avg = np.mean(final.real, 0)
 #     final[n] = sni.shift(i, shift[n], order=1)
 # averaged = np.mean(final, 0)
 
+# %%
 # calculate the FFT of the averaged ifg
 avg_fft = np.fft.ifftshift(np.fft.fft(np.fft.fftshift(avg)))
 T = IFG[:, :, 0]
@@ -88,3 +94,9 @@ ind = np.logical_and(freq >= -300e6, freq <= 300e6).nonzero()
 # save the averaged data
 # np.hstack([T[0][:, np.newaxis], avg[:, np.newaxis]]).tofile(
 #     "background_avg" + str(len(avg)) + ".txt")
+
+# %% Plotting
+
+plt.figure()
+plt.plot(freq * 1e-6, avg_fft.__abs__())
+plt.ylim(-.1, 1.5)
