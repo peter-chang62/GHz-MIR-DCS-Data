@@ -8,14 +8,23 @@ clipboard_and_style_sheet.style_sheet()
 
 normalize = lambda vec: vec / np.max(abs(vec))
 
+
+def plot_section(arr, npts, npts_sec):
+    if len(arr.shape) > 1:
+        [plt.plot(i[npts // 2 - npts_sec: npts // 2 + npts_sec]) for i in arr]
+    else:
+        plt.plot(arr[npts // 2 - npts_sec:npts // 2 + npts_sec])
+
+
 # get the points per interferogram
-path = r"G:\.shortcut-targets-by-id\1x47gJys_dhP6gubqgzefkAm5X9gEfoKP\GHz MIR DCS Data\210921\interferogram_8.asc"
+google_drive_path = "G:/.shortcut-targets-by-id" \
+                    "/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/GHz MIR DCS" \
+                    "Data/210921/"
+file = "interferogram_8.asc"
+path = google_drive_path + file
+
 ifg = gp.IFG(path, read_chunk=True, chunksize=2e6)
 npts = ifg.ppifg()
-
-# adjust to get write npts (can tell by plotting)
-# npts += 1
-# npts += -1
 
 # using ppifg to get the data
 it = ifg.get_iter(chunksize=npts, offset=npts // 2)
@@ -24,11 +33,11 @@ it = ifg.get_iter(chunksize=npts, offset=npts // 2)
 IFG = []
 for n in range(100):
     IFG.append(next(it).values)
-    
+
 # pull all the interferograms
-#IFG = [i.values for i in ifg.get_iter(chunksize=npts, offset=npts // 2)]
-#length = np.array([len(i) for i in IFG])
-#if not np.all(length == length[0]):
+# IFG = [i.values for i in ifg.get_iter(chunksize=npts, offset=npts // 2)]
+# length = np.array([len(i) for i in IFG])
+# if not np.all(length == length[0]):
 #    IFG = IFG[:-1]
 
 # only average 10 interferograms
@@ -40,7 +49,7 @@ Y = (Y.T - np.mean(Y, 1)).T
 
 # calculate the shifts needed
 Sec = Y[:, npts // 2 - 200: npts // 2 + 200]
-FTSec = np.fft.ifftshift(np.fft.fft(np.fft.fftshift(Sec, axes=1), axis=1),  
+FTSec = np.fft.ifftshift(np.fft.fft(np.fft.fftshift(Sec, axes=1), axis=1),
                          axes=1)
 FTSec = np.pad(FTSec, ((0, 0), (2000, 2000)), constant_values=0.)
 ref = FTSec[0]
@@ -73,19 +82,9 @@ dT = np.mean(np.diff(T, axis=1))
 freq = np.fft.fftshift(np.fft.fftfreq(len(avg_fft), dT))
 
 # get rid of f0 or else plotting is annoying
-ind = np.logical_and(freq>=-300e6, freq<=300e6).nonzero()
+ind = np.logical_and(freq >= -300e6, freq <= 300e6).nonzero()
 # avg_fft[ind]=0
 
 # save the averaged data
-# np.hstack([T[0][:, np.newaxis], avg[:, np.newaxis]]).tofile("background_avg" + str(len(avg)) + ".txt")
-
-# plotting
-# plt.figure()
-# [plt.plot(T[0][npts // 2 - 200: npts // 2 + 200] * 1e6,
-#           normalize(i.real[npts // 2 - 200: npts // 2 + 200])) for i in final]
-# plt.plot(T[0][npts // 2 - 200: npts // 2 + 200] * 1e6,
-#          normalize(averaged[npts // 2 - 200:npts // 2 + 200]), 'k')
-
-# plt.figure()
-# [plt.plot(T[0] * 1e6, normalize(i.real)) for i in final]
-# plt.plot(T[0] * 1e6, normalize(averaged), 'k')
+# np.hstack([T[0][:, np.newaxis], avg[:, np.newaxis]]).tofile(
+#     "background_avg" + str(len(avg)) + ".txt")
