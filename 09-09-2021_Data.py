@@ -9,50 +9,59 @@ clipboard_and_style_sheet.style_sheet()
 normalize = lambda vec: vec / np.max(abs(vec))
 
 
-def plot_section(arr, npts, npts_sec):
-    if len(arr.shape) > 1:
-        [plt.plot(i[npts // 2 - npts_sec: npts // 2 + npts_sec]) for i in arr]
+def plot_section(arr, npts, npts_sec, color=None):
+    if color is None:
+        if len(arr.shape) > 1:
+            [plt.plot(i[npts // 2 - npts_sec: npts // 2 + npts_sec]) for i in
+             arr]
+        else:
+            plt.plot(arr[npts // 2 - npts_sec:npts // 2 + npts_sec])
     else:
-        plt.plot(arr[npts // 2 - npts_sec:npts // 2 + npts_sec])
+        if len(arr.shape) > 1:
+            [plt.plot(i[npts // 2 - npts_sec: npts // 2 + npts_sec],
+                      color=color) for i in arr]
+        else:
+            plt.plot(arr[npts // 2 - npts_sec:npts // 2 + npts_sec],
+                     color=color)
 
 
 # %%
 # get the points per interferogram
 google_drive_path = "G:/.shortcut-targets-by-id" \
                     "/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/GHz MIR DCS " \
-                    "Data/210923/"
-file = "ifg_nazanin_attenuated.asc"
+                    "Data/210924/"
+file = "ifg_2.asc"
 path = google_drive_path + file
 
 ifg = gp.IFG(path, read_chunk=True, chunksize=2e6)
-npts = ifg.ppifg()
+# npts = ifg.ppifg() + 1
+npts = 191459
 
 # using ppifg to get the data
 it = ifg.get_iter(chunksize=npts, offset=npts // 2)
 
 # %%
-# pull 50 interferograms
 IFG = []
-for n in range(50):
+for n in range(1000):
     print(n)
-    IFG.append(next(it).values)
+    try:
+        _ = next(it)
+    except:
+        break
+    IFG.append(_.values)
 
-# pull all the interferograms
-# IFG = [i.values for i in ifg.get_iter(chunksize=npts, offset=npts // 2)]
-# length = np.array([len(i) for i in IFG])
-# if not np.all(length == length[0]):
-#    IFG = IFG[:-1]
+length = np.array([len(i) for i in IFG])
+if not np.all(length == length[0]):
+    IFG = IFG[:-1]
 
-# only average 10 interferograms
-# IFG = IFG[0:10]
-
-# %%
 IFG = np.array(IFG)
 Y = IFG[:, :, 1]
 Y = (Y.T - np.mean(Y, 1)).T
 
 # calculate the shifts needed
 Sec = Y[:, npts // 2 - 200: npts // 2 + 200]
+
+# %%
 FTSec = np.fft.ifftshift(np.fft.fft(np.fft.fftshift(Sec, axes=1), axis=1),
                          axes=1)
 FTSec = np.pad(FTSec, ((0, 0), (2000, 2000)), constant_values=0.)
@@ -91,6 +100,7 @@ freq = np.fft.fftshift(np.fft.fftfreq(len(avg_fft), dT))
 ind = np.logical_and(freq >= -300e6, freq <= 300e6).nonzero()
 # avg_fft[ind]=0
 
+# %%
 # save the averaged data
 # np.hstack([T[0][:, np.newaxis], avg[:, np.newaxis]]).tofile(
 #     "background_avg" + str(len(avg)) + ".txt")
@@ -99,4 +109,4 @@ ind = np.logical_and(freq >= -300e6, freq <= 300e6).nonzero()
 
 plt.figure()
 plt.plot(freq * 1e-6, avg_fft.__abs__())
-plt.ylim(-.1, 1.5)
+plt.ylim(-.1, 7)
