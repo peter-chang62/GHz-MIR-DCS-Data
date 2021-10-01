@@ -1,3 +1,5 @@
+import gc
+
 import numpy as np
 import pandas as pd
 
@@ -22,6 +24,9 @@ class IFG:
         self.h = None
         self.step = int(1e5)
 
+        self.thresh = 100
+        self.h = 1
+
     def next_frame(self):
         if not self.read_chunk:
             print("dataframe is not an iterable")
@@ -44,21 +49,25 @@ class IFG:
         return self.Nm
 
     def _N_spacing(self):
-        self.h = 1
         _ = np.ceil(len(self.y) / self.step) * self.step
         y_ = np.pad(self.y, (0, int(_ - len(self.y))), constant_values=0)
-        y__ = y_.reshape(len(y_) // self.step, self.step)
+        y__ = abs(y_.reshape(len(y_) // self.step, self.step))
         ind = np.argmax(y__, axis=1)
         maxes = np.max(y__, axis=1)
         xind = np.arange(len(ind)) * self.step + ind
         xind_ = xind[maxes > self.level]
-
         self.N = np.diff(xind_)
-        if np.std(self.N) > 100:
+        if np.std(self.N) > self.thresh:
             self.N = self.N[self.N > 100]
             self.step = int(np.round(np.mean(self.N)))
-            self._N_spacing()
+            print("trying again, ", self.h)
+            if self.h > 3:
+                self.thresh *= 2
+            gc.collect()
             self.h += 1
+            self._N_spacing()
+        else:
+            self.h = 1
 
 
 def get_dataframe(path, read_chunk=False, chunksize=None, offset=0):

@@ -29,13 +29,13 @@ def plot_section(arr, npts, npts_sec, color=None):
 # get the points per interferogram
 google_drive_path = "G:/.shortcut-targets-by-id" \
                     "/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/GHz MIR DCS " \
-                    "Data/210924/"
-file = "ifg_2.asc"
+                    "Data/210930/"
+file = "ifg_109khz_dfrep_odd_looking.asc"
 path = google_drive_path + file
 
-ifg = gp.IFG(path, read_chunk=True, chunksize=2e6)
-# npts = ifg.ppifg() + 1
-npts = 191459
+ifg = gp.IFG(path, read_chunk=True, chunksize=2e7)
+npts = ifg.ppifg()
+# npts = 190887
 
 # using ppifg to get the data
 it = ifg.get_iter(chunksize=npts, offset=npts // 2)
@@ -59,7 +59,7 @@ Y = IFG[:, :, 1]
 Y = (Y.T - np.mean(Y, 1)).T
 
 # calculate the shifts needed
-Sec = Y[:, npts // 2 - 200: npts // 2 + 200]
+Sec = Y[:, npts // 2 - 50: npts // 2 + 50]
 
 # %%
 FTSec = np.fft.ifftshift(np.fft.fft(np.fft.fftshift(Sec, axes=1), axis=1),
