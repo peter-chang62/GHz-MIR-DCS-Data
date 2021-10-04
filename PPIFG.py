@@ -5,7 +5,8 @@ import pandas as pd
 
 
 class IFG:
-    def __init__(self, path, read_chunk=False, chunksize=None, level=.025):
+    def __init__(self, path, read_chunk=False, chunksize=None,
+                 level_percent=20.):
         dataframe = get_dataframe(path, read_chunk, chunksize)
         self.iter = None
         if read_chunk:
@@ -18,11 +19,11 @@ class IFG:
         self.read_chunk = read_chunk
         self.x = self.dataframe.values[:, 0]
         self.y = self.dataframe.values[:, 1]
-        self.level = level
+        self.level = max(self.y) * level_percent * .01
         self.N = None
         self.Nm = None
         self.h = None
-        self.step = int(1e5)
+        self.step = int(1e3)
 
         self.thresh = 100
         self.h = 1
@@ -57,6 +58,7 @@ class IFG:
         xind = np.arange(len(ind)) * self.step + ind
         xind_ = xind[maxes > self.level]
         self.N = np.diff(xind_)
+        self.xind = xind_
         if np.std(self.N) > self.thresh:
             self.N = self.N[self.N > 100]
             self.step = int(np.round(np.mean(self.N)))
@@ -68,6 +70,27 @@ class IFG:
             self._N_spacing()
         else:
             self.h = 1
+
+
+class IFG_from_memory:
+    def __init__(self, data, level_percent=20.):
+        self.x = data[:, 0]
+        self.y = data[:, 1]
+        self.level = max(self.y) * level_percent * .01
+
+        self.N = None
+        self.Nm = None
+        self.h = None
+        self.step = int(1e5)
+
+        self.thresh = 100
+        self.h = 1
+
+    def ppifg(self):
+        return IFG.ppifg(self)
+
+    def _N_spacing(self):
+        return IFG._N_spacing(self)
 
 
 def get_dataframe(path, read_chunk=False, chunksize=None, offset=0):
