@@ -1,7 +1,7 @@
 import scipy.ndimage.interpolation as sni
 import numpy as np
 import matplotlib.pyplot as plt
-import GaGeIFGProcessing as gp
+import PPIFG as gp
 import clipboard_and_style_sheet
 
 clipboard_and_style_sheet.style_sheet()
@@ -27,15 +27,14 @@ def plot_section(arr, npts, npts_sec, color=None):
 
 # %%
 # get the points per interferogram
-google_drive_path = "G:/.shortcut-targets-by-id" \
-                    "/1x47gJys_dhP6gubqgzefkAm5X9gEfoKP/GHz MIR DCS " \
-                    "Data/210930/"
-file = "ifg_109khz_dfrep_odd_looking.asc"
+google_drive_path = r"G:\.shortcut-targets-by-id" \
+                    r"\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\211004/"
+file = "ifg_3.asc"
 path = google_drive_path + file
 
-ifg = gp.IFG(path, read_chunk=True, chunksize=2e7)
-npts = ifg.ppifg()
-# npts = 190887
+ifg = gp.IFG(path, read_chunk=True, chunksize=2e6, level_percent=40.)
+npts = 38282
+# npts = ifg.ppifg()
 
 # using ppifg to get the data
 it = ifg.get_iter(chunksize=npts, offset=npts // 2)
@@ -59,7 +58,7 @@ Y = IFG[:, :, 1]
 Y = (Y.T - np.mean(Y, 1)).T
 
 # calculate the shifts needed
-Sec = Y[:, npts // 2 - 50: npts // 2 + 50]
+Sec = Y[:, npts // 2 - 300: npts // 2 + 300]
 
 # %%
 FTSec = np.fft.ifftshift(np.fft.fft(np.fft.fftshift(Sec, axes=1), axis=1),
