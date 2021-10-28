@@ -77,10 +77,10 @@ nu_end = dnu * 4
 freq_axis = np.linspace(nu_start, nu_end, len(fft_freq) // 2)
 wl_axis = (sc.c / freq_axis) * 1e6
 
-fig, ax = plt.subplots(1, 1, figsize=np.array([19.2 ,  9.63]))
-ax.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__() ** 2)
+fig, ax = plt.subplots(1, 1, figsize=np.array([19.2, 9.63]))
+ax.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__())
 ax.set_xlim(3.5, 4.5)
-ax.set_ylim(0, 0.6)
+ax.set_ylim(0, 0.8)
 ax.set_xlabel("$\mathrm{\mu m}$")
 # plt.savefig("10-26-2021-Data.png")
 

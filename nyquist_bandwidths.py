@@ -5,9 +5,6 @@ import scipy.constants as sc
 
 clipboard_and_style_sheet.style_sheet()
 
-start = sc.c / 4.55e-6
-end = sc.c / 3.45e-6
-
 
 def bandwidth(fr, dfr):
     return fr ** 2 / (2 * dfr)
@@ -69,7 +66,7 @@ def find_allowed_nyquist_bandwidths(vi, vf):
     N_vf = int(vf // dnu_min)
     N_vi = int(vi // dnu_min)
     bounds_vi = vi / np.arange(1, N_vi + 1)
-    bounds_vf = end / np.arange(2, N_vf + 1)
+    bounds_vf = nu_end / np.arange(2, N_vf + 1)
 
     bounds_vf = bounds_vf[::-1]
     bounds_vi = bounds_vi[::-1]
@@ -95,17 +92,19 @@ def return_allowed_indices_dnu(dnu, vi, vf):
 
 # %%
 # fr = 1e9
-# allowed_dnu_windows = find_allowed_nyquist_bandwidths(start, end)
-# allowed_dfr_windows = find_allowed_dfr(start, end, fr)
+# nu_start = sc.c / 4.55e-6
+# nu_end = sc.c / 3.45e-6
+# allowed_dnu_windows = find_allowed_nyquist_bandwidths(nu_start, nu_end)
+# allowed_dfr_windows = find_allowed_dfr(nu_start, nu_end, fr)
 #
-# dfr = np.linspace(50, fr ** 2 / (2 * (end - start)), 5000)
+# dfr = np.linspace(50, fr ** 2 / (2 * (nu_end - nu_start)), 5000)
 # dnu = bandwidth(fr, dfr)
-# ind = return_allowed_indices_dnu(dnu, start, end)
+# ind = return_allowed_indices_dnu(dnu, nu_start, nu_end)
 #
 # x = np.zeros(len(dfr))
 # plt.plot(dfr[ind], x[ind], '.')
 # [plt.axvline(i) for i in allowed_dfr_windows.flatten()]
-# plt.axvline(fr ** 2 / (2 * end))
+# plt.axvline(fr ** 2 / (2 * nu_end))
 #
 # """Given an fr an dfr, we can also calculate the nearest fr, or nearest dfr that would give us an integer ppifg.
 #
