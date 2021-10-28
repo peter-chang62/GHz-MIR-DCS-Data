@@ -66,7 +66,7 @@ def find_allowed_nyquist_bandwidths(vi, vf):
     N_vf = int(vf // dnu_min)
     N_vi = int(vi // dnu_min)
     bounds_vi = vi / np.arange(1, N_vi + 1)
-    bounds_vf = nu_end / np.arange(2, N_vf + 1)
+    bounds_vf = vf / np.arange(2, N_vf + 1)
 
     bounds_vf = bounds_vf[::-1]
     bounds_vi = bounds_vi[::-1]
@@ -90,10 +90,13 @@ def return_allowed_indices_dnu(dnu, vi, vf):
                     [(dnu > vf).nonzero()[0]])
     return ind
 
+
 # %%
 # fr = 1e9
-# nu_start = sc.c / 4.55e-6
-# nu_end = sc.c / 3.45e-6
+# # nu_start = sc.c / 4.55e-6
+# # nu_end = sc.c / 3.45e-6
+# nu_start = sc.c / 4.4e-6
+# nu_end = sc.c / 3.6e-6
 # allowed_dnu_windows = find_allowed_nyquist_bandwidths(nu_start, nu_end)
 # allowed_dfr_windows = find_allowed_dfr(nu_start, nu_end, fr)
 #
