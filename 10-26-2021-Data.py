@@ -9,6 +9,8 @@ import ProcessingFunctions as pf
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
+import nyquist_bandwidths as nyquist
+import scipy.constants as sc
 
 clipboard_and_style_sheet.style_sheet()
 
@@ -31,8 +33,8 @@ data = data[:N_ifgs * ppifg]
 data.resize(N_ifgs, ppifg)
 
 # %% limit amount to averge
-n_avg = 100
-data = data[:n_avg]
+# n_avg = 100
+# data = data[:n_avg]
 
 # %% calculate shifts needed
 n_zoom = 100
@@ -64,4 +66,17 @@ avg = np.mean(shift_corr_data, axis=0)
 # %% final fft
 ft_avg = np.fft.fftshift(np.fft.fft(np.fft.ifftshift(avg)))
 
-plt.plot(ft_avg.__abs__())
+# plt.plot(ft_avg.__abs__())
+
+# %% got fr and dfr_guess from counter
+fr = 1.01e9 - 9991829.1
+dfr_guess = 23055.3
+dfr = nyquist.calc_dfr_for_ppifg(fr, dfr_guess, ppifg)
+dnu = nyquist.bandwidth(fr, dfr)
+nu_start = dnu * 3
+nu_end = dnu * 4
+freq_axis = np.linspace(nu_start, nu_end, len(fft_freq) // 2)
+wl_axis = (sc.c / freq_axis) * 1e6
+plt.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__() ** 2)
+plt.xlim(1e4 / 2900, 1e4 / 2200)
+plt.ylim(0, 1)
