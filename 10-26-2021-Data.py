@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
 import nyquist_bandwidths as nyquist
 import scipy.constants as sc
+import time
 
 clipboard_and_style_sheet.style_sheet()
 
@@ -24,8 +25,11 @@ def pad(arr, npts):
     return np.pad(arr, ([0, 0], [npts, npts]), constant_values=0 + 0j)
 
 
+t1 = time.time()
 # %% Retrieve the data
-data = np.fromfile("data/ifg_new_computer.txt")
+# folder = "data/"
+folder = r"G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\211026/"
+data = np.fromfile(folder + "ifg_new_computer.txt")
 ppifg = pf.find_npts(data)[0]
 data = data[ppifg // 2:]
 N_ifgs = len(data) // ppifg
@@ -58,15 +62,10 @@ phase[:] = fft_freq
 phase *= 1j * shifts[:, np.newaxis] * 2 * np.pi
 phase = np.exp(phase)
 ft_data_fftshift *= phase
-shift_corr_data = np.fft.fftshift(np.fft.ifft(ft_data_fftshift, axis=1), axes=1).real
-
-# plot_section(shift_corr_data, ppifg, 50)
-avg = np.mean(shift_corr_data, axis=0)
 
 # %% final fft
-ft_avg = np.fft.fftshift(np.fft.fft(np.fft.ifftshift(avg)))
-
-# plt.plot(ft_avg.__abs__())
+# ft_avg = np.fft.fftshift(np.fft.fft(np.fft.ifftshift(avg)))
+ft_avg = np.mean(np.fft.fftshift(ft_data_fftshift), axis=0)
 
 # %% got fr and dfr_guess from counter
 fr = 1.01e9 - 9991829.1
@@ -77,6 +76,19 @@ nu_start = dnu * 3
 nu_end = dnu * 4
 freq_axis = np.linspace(nu_start, nu_end, len(fft_freq) // 2)
 wl_axis = (sc.c / freq_axis) * 1e6
-plt.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__() ** 2)
-plt.xlim(1e4 / 2900, 1e4 / 2200)
-plt.ylim(0, 1)
+
+fig, ax = plt.subplots(1, 1, figsize=np.array([19.2 ,  9.63]))
+ax.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__() ** 2)
+ax.set_xlim(3.5, 4.5)
+ax.set_ylim(0, 0.6)
+ax.set_xlabel("$\mathrm{\mu m}$")
+# plt.savefig("10-26-2021-Data.png")
+
+t2 = time.time()
+print(t2 - t1, "s")
+
+# %% checking to see if shift correction was successful
+# shift_corr_data = np.fft.fftshift(np.fft.ifft(ft_data_fftshift, axis=1), axes=1).real
+#
+# # plot_section(shift_corr_data, ppifg, 50)
+# avg = np.mean(shift_corr_data, axis=0)
