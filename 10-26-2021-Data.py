@@ -27,10 +27,7 @@ def pad(arr, npts):
 
 t1 = time.time()
 # %% Retrieve the data
-# folder = "/run/user/1000/gvfs/google-drive:host=colorado.edu," \
-#          "user=pech6593/GVfsSharedWithMe/1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM/10cpj_CrE-KqOTS5um-eYbrg8hRQYLf92/"
-# folder = r"G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\211026/"
-folder = "data/"
+folder = r"G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\211026/"
 data = np.fromfile(folder + "ifg_new_computer.txt")
 ppifg = pf.find_npts(data)[0]
 data = data[ppifg // 2:]
