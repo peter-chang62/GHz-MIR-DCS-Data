@@ -63,7 +63,6 @@ phase = np.exp(phase)
 ft_data_fftshift *= phase
 
 # %% final fft
-# ft_avg = np.fft.fftshift(np.fft.fft(np.fft.ifftshift(avg)))
 ft_avg = np.mean(np.fft.fftshift(ft_data_fftshift), axis=0)
 
 # %% got fr and dfr_guess from counter
@@ -89,6 +88,5 @@ print(t2 - t1, "s")
 # %% checking to see if shift correction was successful
 # shift_corr_data = np.fft.fftshift(np.fft.ifft(ft_data_fftshift, axis=1), axes=1).real
 #
-# # plot_section(shift_corr_data, ppifg, 50)
+# plot_section(shift_corr_data, ppifg, 50)
 # avg = np.mean(shift_corr_data, axis=0)
-
