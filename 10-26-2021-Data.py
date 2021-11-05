@@ -75,7 +75,8 @@ nu_end = dnu * 4
 freq_axis = np.linspace(nu_start, nu_end, len(fft_freq) // 2)
 wl_axis = (sc.c / freq_axis) * 1e6
 
-fig, ax = plt.subplots(1, 1, figsize=np.array([19.2, 9.63]))
+# fig, ax = plt.subplots(1, 1, figsize=np.array([19.2, 9.63]))
+fig, ax = plt.subplots(1, 1)
 ax.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__())
 ax.set_xlim(3.5, 4.5)
 ax.set_ylim(0, 0.8)
@@ -86,7 +87,23 @@ t2 = time.time()
 print(t2 - t1, "s")
 
 # %% checking to see if shift correction was successful
-# shift_corr_data = np.fft.fftshift(np.fft.ifft(ft_data_fftshift, axis=1), axes=1).real
-#
-# plot_section(shift_corr_data, ppifg, 50)
-# avg = np.mean(shift_corr_data, axis=0)
+shift_corr_data = np.fft.fftshift(np.fft.ifft(ft_data_fftshift, axis=1), axes=1).real
+
+plt.figure()
+plot_section(shift_corr_data, ppifg, 50)
+avg = np.mean(shift_corr_data, axis=0)
+
+# %% allowed nyquist windows
+# to prevent naming conflicts, I have it in a function
+# I eyeballed this from the FFT above
+wls = np.array([4.4, 3.5])  # um
+nus = sc.c / (wls * 1e-6)
+dfr_ = np.linspace(50, fr ** 2 / (2 * np.diff(nus)), 5000).flatten()
+dnu_ = nyquist.bandwidth(fr, dfr_)
+ind = nyquist.return_allowed_indices_dnu(dnu_, *nus)
+
+fig, ax = plt.subplots(1, 1)
+x = np.zeros(len(dfr_))
+ax.plot(dfr_, x)
+ax.plot(dfr_[ind], x[ind], 'o')
+[ax.axvline(i, color='r', linestyle='--') for i in nyquist.find_allowed_dfr(*nus, fr).flatten()]
