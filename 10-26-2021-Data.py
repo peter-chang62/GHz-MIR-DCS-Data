@@ -92,6 +92,7 @@ shift_corr_data = np.fft.fftshift(np.fft.ifft(ft_data_fftshift, axis=1), axes=1)
 plt.figure()
 plot_section(shift_corr_data, ppifg, 50)
 avg = np.mean(shift_corr_data, axis=0)
+plt.plot(avg[ppifg // 2 - 50: ppifg // 2 + 50], color='k')
 
 # %% allowed nyquist windows
 # to prevent naming conflicts, I have it in a function
