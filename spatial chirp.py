@@ -5,8 +5,10 @@ import scipy.constants as sc
 import clipboard_and_style_sheet
 from scipy.interpolate import interp1d
 
-
 # clipboard_and_style_sheet.style_sheet()
+
+f_coll = 1.5  # inch
+f_fiber_coupling = 7.  # mm
 
 
 class MFD:
@@ -51,7 +53,7 @@ def abcd_to_oap_input(wl, l_free_space_m):
     """
     wo_origin = 15.0e-6
     length_ppln = 1.0e-3
-    f = sc.inch * 2
+    f = sc.inch * f_coll
 
     q = q_focus(wo_origin, wl)
     q = medium(q, length_ppln / 2, n_ppln(wl * 1e6))
@@ -64,7 +66,7 @@ def abcd_to_oap_input(wl, l_free_space_m):
 def waist_at_oap_collimator(wl):
     wo_origin = 15.0e-6
     length_ppln = 1.0e-3
-    f = sc.inch * 2
+    f = sc.inch * f_coll
 
     q = q_focus(wo_origin, wl)
     q = medium(q, length_ppln / 2, n_ppln(wl * 1e6))
@@ -96,6 +98,10 @@ def waist_at_fiber_output(wl, f_mm):
     return waist(q, wl)
 
 
+def overlap_integral(w1, w2):
+    return 2 * w1 * w2 / (w1 ** 2 + w2 ** 2)
+
+
 # %%
 wl = np.linspace(3e-6, 5e-6, 5000)
 l_freespace_m = np.linspace(.3, 1., 100)
@@ -104,7 +110,7 @@ D_oap = np.zeros((len(l_freespace_m), len(wl)))
 D_fiber = np.zeros((len(l_freespace_m), len(wl)))
 for n, l in enumerate(l_freespace_m):
     D_oap[n] = waist_at_oap_input(wl, l) * 2
-    D_fiber[n] = waist_at_fiber_input(wl, 7., l) * 2
+    D_fiber[n] = waist_at_fiber_input(wl, f_fiber_coupling, l) * 2
 
 # %%
 y = l_freespace_m * 100
@@ -116,21 +122,38 @@ plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("distance (cm)")
 plt.title("Diameter at fiber input coupling OAP (mm)")
 
+# %%
 plt.figure()
 plt.pcolormesh(x, y, D_fiber * 1e6, cmap='jet')
 plt.colorbar()
 plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("distance (cm)")
-plt.title("Diameter at fiber input coupling OAP ($\mathrm{\mu m}$)")
+plt.title("Diameter at fiber input after OAP ($\mathrm{\mu m}$)")
 
+# %%
 plt.figure()
 plt.title("Fiber stated MFD specs")
 plt.plot(MFD().wl_um, MFD().mfd)
 plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("MFD $\mathrm{\mu m}$")
 
+# %%
 plt.figure()
 plt.title("Waist after PPLN OAP Collimator")
 plt.plot(wl * 1e6, waist_at_oap_collimator(wl) * 1e3)
 plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("mm")
+
+# %%
+ll, ul = MFD().wl_um[[0, -1]]
+ind = (wl * 1e6 > ll).nonzero()[0]
+mfd_fiber_data = MFD().grid(wl[ind] * 1e6)
+mfd_fiber = D_fiber[:, ind] * 1e6
+overlap = overlap_integral(mfd_fiber / 2, mfd_fiber_data / 2)
+
+plt.figure()
+plt.title("overlap integral")
+plt.pcolormesh(x[ind], y, overlap, cmap='jet')
+plt.xlabel("$\mathrm{\lambda \mu m}$")
+plt.ylabel("distance (cm)")
+plt.colorbar()
