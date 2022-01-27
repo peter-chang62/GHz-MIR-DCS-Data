@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 
 # clipboard_and_style_sheet.style_sheet()
 
-f_coll = 1.5  # inch
+f_coll = 1.  # inch
 f_fiber_coupling = 7.  # mm
 
 
@@ -153,7 +153,7 @@ overlap = overlap_integral(mfd_fiber / 2, mfd_fiber_data / 2)
 
 plt.figure()
 plt.title("overlap integral")
-plt.pcolormesh(x[ind], y, overlap, cmap='jet')
+plt.pcolormesh(x[ind], y, overlap * 100., cmap='jet')
 plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("distance (cm)")
 plt.colorbar()
