@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
 import scipy.constants as sc
 
-clipboard_and_style_sheet.style_sheet()
+# clipboard_and_style_sheet.style_sheet()
 
 
 def bandwidth(fr, dfr):
