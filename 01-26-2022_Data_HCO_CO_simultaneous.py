@@ -5,6 +5,7 @@ import ProcessingFunctions as pf
 import nyquist_bandwidths as nq
 import mkl_fft
 import time
+import scipy.constants as sc
 
 
 # clipboard_and_style_sheet.style_sheet()
@@ -12,7 +13,7 @@ import time
 
 # %%
 # path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
-# data = np.fromfile(path + "H2CO_filter_60972x65484.bin", '<h')
+# data = np.fromfile(path + "CO_filter_60972x65484.bin", '<h')
 #
 # # %%
 # ppifg = 60972 // 2
@@ -28,9 +29,9 @@ import time
 #     zoom = data[:, ppifg // 2 - 200:ppifg // 2 + 200]
 #     ftzoom = np.fft.ifftshift(mkl_fft.fft(np.fft.ifftshift(zoom, axes=1), axis=1), axes=1)
 #
-#     # getting rid of f0
-#     ftzoom[:, 300:] = 0.0
-#     ftzoom[:, :100] = 0.0
+#     # getting rid of f0 for H2CO (comment out these two lines for the CO one)
+#     # ftzoom[:, 300:] = 0.0
+#     # ftzoom[:, :100] = 0.0
 #
 #     corrW = ftzoom * ftzoom[0].conj()
 #     corrW = np.pad(corrW, ([0, 0], [2 ** 10, 2 ** 10]), constant_values=0.0)
@@ -53,7 +54,7 @@ import time
 #         print('{n}/{N}'.format(n=n, N=Nifgs))
 #
 # # %%
-# data.tofile(path + f"H2CO_filter_{Nifgs}x{ppifg}_phase_corrected.bin")
+# data.tofile(path + f"CO_filter_{Nifgs}x{ppifg}_phase_corrected.bin")
 #
 # # %%
 # avg = np.mean(data, axis=0)
@@ -171,3 +172,38 @@ ax[0].set_xlim(-500, 500)
 ax[1].set_xlim(-100, 100)
 [i.set_xlabel("time (ns)") for i in ax]
 fig.suptitle("$\mathrm{CO}$")
+
+# %%
+fr = 1e9  # approximate
+dfr = 1 / ((1 / fr) * ppifg)
+
+wl_lim_short = [3.4, 3.7]
+nu_lim_short = sc.c / (np.array(wl_lim_short)[::-1] * 1e-6)
+wl_lim_long = [4.3, 4.8]
+nu_lim_long = sc.c / (np.array(wl_lim_long)[::-1] * 1e-6)
+
+N_nyq_short = 6
+N_nyq_long = 5
+dnu = nq.bandwidth(fr, dfr)
+window_long = np.array([dnu * (N_nyq_long - 1), dnu * N_nyq_long])
+window_short = np.array([dnu * (N_nyq_short - 1), dnu * N_nyq_short])
+freq_axis_long = np.linspace(*window_long, len(freq_full) // 2)
+freq_axis_short = np.linspace(*window_short, len(freq_full) // 2)
+wl_axis_long = sc.c * 1e6 / freq_axis_long
+wl_axis_short = sc.c * 1e6 / freq_axis_short
+
+# %%
+fig, ax = plt.subplots(1, 1)
+ax.plot(wl_axis_long, ftavgCO.__abs__()[:len(freq_full) // 2])
+ax.set_xlim(3.94, 4.89)
+ax.set_ylim(0, 30e3)
+ax.set_xlabel("wavelength $\mathrm{\mu m}$")
+fig.suptitle("$\mathrm{CO}$")
+
+# %%
+fig, ax = plt.subplots(1, 1)
+ax.plot(wl_axis_short, ftavgH2CO.__abs__()[:len(freq_full) // 2])
+ax.set_xlim(3.3, 3.9)
+ax.set_ylim(0, 15e3)
+ax.set_xlabel("wavelength $\mathrm{\mu m}$")
+fig.suptitle("$\mathrm{H_2CO}$")
