@@ -6,9 +6,31 @@ import nyquist_bandwidths as nq
 import mkl_fft
 import time
 import scipy.constants as sc
+import scipy.signal.windows as sw
+import scipy.signal as si
+import os
 
 
 # clipboard_and_style_sheet.style_sheet()
+
+def normalize(vec):
+    return vec / np.max(abs(vec))
+
+
+def delete_file_in_image_directory():
+    # first delete these files
+    del_files = [i.path for i in os.scandir("TempImages")]
+    [os.remove(i) for i in del_files]
+
+
+def create_mp4(fps, name):
+    command = "ffmpeg -r " + \
+              str(fps) + \
+              " -f image2 -s 1920x1080 -y -i TempImages/%d.png " \
+              "-vcodec libx264 -crf 25  -pix_fmt yuv420p " + \
+              name
+    os.system(command)
+
 
 def fft(x, axis=None):
     """
@@ -197,7 +219,7 @@ wl_axis_short = sc.c * 1e6 / freq_axis_short
 
 # %%
 fig, ax = plt.subplots(1, 1)
-ax.plot(wl_axis_long, ftavgCO.__abs__()[:len(freq_full) // 2])
+ax.plot(wl_axis_long, ftavgCO.__abs__()[len(freq_full) // 2:])
 ax.set_xlim(3.94, 4.89)
 ax.set_ylim(0, 30e3)
 ax.set_xlabel("wavelength $\mathrm{\mu m}$")
@@ -205,8 +227,36 @@ fig.suptitle("$\mathrm{CO}$")
 
 # %%
 fig, ax = plt.subplots(1, 1)
-ax.plot(wl_axis_short, ftavgH2CO.__abs__()[:len(freq_full) // 2])
+ax.plot(wl_axis_short, ftavgH2CO.__abs__()[len(freq_full) // 2:])
 ax.set_xlim(3.3, 3.9)
 ax.set_ylim(0, 15e3)
 ax.set_xlabel("wavelength $\mathrm{\mu m}$")
 fig.suptitle("$\mathrm{H_2CO}$")
+
+# %% phase noise analysis
+# window = sw.tukey(100)
+# pad = (ppifg - len(window)) // 2
+# window = np.pad(window, (pad, pad), constant_values=0.)
+#
+# fig, ax = plt.subplots(1, 1)
+# for n in range(150):
+#     ft = fft(np.roll(window, n) * avgCO)
+#     ax.clear()
+#     ax.plot(freq_full[ppifg // 2:][50:], ft.__abs__()[ppifg // 2:][50:])
+#     ax.set_title(str(n))
+#     # plt.savefig(f"TempImages/{n}.png")
+#     plt.pause(.001)
+
+# %% signal level changes
+# fig, ax = plt.subplots(1, 1)
+# for i, n in enumerate(range(100, int(ppifg), 100)):
+#     window = sw.tukey(n)
+#     pad = (ppifg - len(window)) // 2
+#     window = np.pad(window, (pad, pad), constant_values=0.)
+#     ft = fft(dataCO[0] * window)
+#
+#     ax.clear()
+#     ax.plot(freq_full[ppifg // 2:][50:], ft.__abs__()[ppifg // 2:][50:])
+#     ax.set_title(str(n))
+#     # plt.savefig(f"TempImages/{i}.png")
+#     plt.pause(.001)
