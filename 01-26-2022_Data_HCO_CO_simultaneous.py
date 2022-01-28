@@ -114,11 +114,11 @@ def ifft(x, axis=None):
 # %% after phase correction
 path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
 dataH2CO = np.fromfile(path + "H2CO_filter_65484x30486_phase_corrected.bin", '<h')
-dataH2CO.resize(65484, 30486)
+dataH2CO.resize(65483, 30486)
 
 # %%
 dataCO = np.fromfile(path + "CO_filter_65484x30486_phase_corrected.bin", '<h')
-dataCO.resize(65484, 30486)
+dataCO.resize(65483, 30486)
 
 # %%
 Nifgs = 65484
