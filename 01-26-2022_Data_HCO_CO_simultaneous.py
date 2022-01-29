@@ -112,12 +112,13 @@ def ifft(x, axis=None):
 # ftavg = np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(avg)))
 
 # %% after phase correction
-path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
-dataH2CO = np.fromfile(path + "H2CO_filter_65484x30486_phase_corrected.bin", '<h')
+# path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
+path = r"C:\Users\fastdaq\Documents\Data\01-26-2022/"
+dataH2CO = np.fromfile(path + "H2CO_filter_65483x30486_phase_corrected.bin", '<h')
 dataH2CO.resize(65483, 30486)
 
 # %%
-dataCO = np.fromfile(path + "CO_filter_65484x30486_phase_corrected.bin", '<h')
+dataCO = np.fromfile(path + "CO_filter_65483x30486_phase_corrected.bin", '<h')
 dataCO.resize(65483, 30486)
 
 # %%
@@ -260,3 +261,21 @@ fig.suptitle("$\mathrm{H_2CO}$")
 #     ax.set_title(str(n))
 #     # plt.savefig(f"TempImages/{i}.png")
 #     plt.pause(.001)
+
+# %% averaged arrays
+dataCO_avg = np.zeros(dataCO.shape, dtype='float64')
+dataCO_avg[0] = dataCO[0]
+for n in range(1, len(dataCO)):
+    dataCO_avg[n] = (dataCO[n] / (n + 1)) + (dataCO_avg[n - 1] * (n / (n + 1)))
+
+print("done")
+dataCO_avg.tofile(path + "CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
+
+# %%
+dataH2CO_avg = np.zeros(dataH2CO.shape, dtype='float64')
+dataH2CO_avg[0] = dataH2CO[0]
+for n in range(1, len(dataH2CO)):
+    dataH2CO_avg[n] = (dataH2CO[n] / (n + 1)) + (dataH2CO_avg[n - 1] * (n / (n + 1)))
+
+dataH2CO_avg.tofile(path + "H2CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
+print("done")
