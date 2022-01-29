@@ -18,7 +18,7 @@ def normalize(vec):
     return vec / np.max(abs(vec))
 
 
-def delete_file_in_image_directory():
+def delete_files_in_image_directory():
     # first delete these files
     del_files = [i.path for i in os.scandir("TempImages")]
     [os.remove(i) for i in del_files]
@@ -115,33 +115,33 @@ def ifft(x, axis=None):
 # %% after phase correction
 path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
 # path = r"C:\Users\fastdaq\Documents\Data\01-26-2022/"
-dataH2CO = np.fromfile(path + "H2CO_filter_65483x30486_phase_corrected.bin", '<h')
-dataH2CO.resize(65483, 30486)
+# dataH2CO = np.fromfile(path + "H2CO_filter_65483x30486_phase_corrected.bin", '<h')
+# dataH2CO.resize(65483, 30486)
 
 # %%
-# dataCO = np.fromfile(path + "CO_filter_65483x30486_phase_corrected.bin", '<h')
-# dataCO.resize(65483, 30486)
+dataCO = np.fromfile(path + "CO_filter_65483x30486_phase_corrected.bin", '<h')
+dataCO.resize(65483, 30486)
 
 # %%
 Nifgs = 65484
 ppifg = 30486
 
 # %%
-avgH2CO = np.mean(dataH2CO, axis=0)
-ftavgH2CO = fft(avgH2CO)
+# avgH2CO = np.mean(dataH2CO, axis=0)
+# ftavgH2CO = fft(avgH2CO)
 
 # %%
-# avgCO = np.mean(dataCO, axis=0)
-# ftavgCO = fft(avgCO)
+avgCO = np.mean(dataCO, axis=0)
+ftavgCO = fft(avgCO)
 
 # %% apodization
-appodH2CO = dataH2CO[:, ppifg // 2 - 200: ppifg // 2 + 200]
+# appodH2CO = dataH2CO[:, ppifg // 2 - 200: ppifg // 2 + 200]
 
 # %% apodization
 # appodCO = dataCO[:, ppifg // 2 - 200: ppifg // 2 + 200]
 
 # %%
-freq_full = np.fft.fftshift(np.fft.fftfreq(len(avgH2CO), 1e-9)) * 1e-6
+freq_full = np.fft.fftshift(np.fft.fftfreq(ppifg, 1e-9)) * 1e-6
 # freq_appod = np.fft.fftshift(np.fft.fftfreq(len(appodH2CO[0]), 1e-9)) * 1e-6
 
 # %%
@@ -264,37 +264,77 @@ dfr = 1 / ((1 / fr) * ppifg)
 #     plt.pause(.001)
 
 # %% averaged arrays
-# dataCO_avg = np.zeros(dataCO.shape, dtype='float64')
-# dataCO_avg[0] = dataCO[0]
-# for n in range(1, len(dataCO)):
-#     dataCO_avg[n] = (dataCO[n] / (n + 1)) + (dataCO_avg[n - 1] * (n / (n + 1)))
-#
-# print("done")
+dataCO_avg = np.zeros(dataCO.shape, dtype='float64')
+dataCO_avg[0] = dataCO[0]
+for n in range(1, len(dataCO)):
+    dataCO_avg[n] = (dataCO[n] / (n + 1)) + (dataCO_avg[n - 1] * (n / (n + 1)))
+
+print("done")
 
 # %%
 # dataCO_avg.tofile(path + "CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
 
 # %%
-dataH2CO_avg = np.zeros(dataH2CO.shape, dtype='float64')
-dataH2CO_avg[0] = dataH2CO[0]
-for n in range(1, len(dataH2CO)):
-    dataH2CO_avg[n] = (dataH2CO[n] / (n + 1)) + (dataH2CO_avg[n - 1] * (n / (n + 1)))
-
-print("done")
+# dataH2CO_avg = np.zeros(dataH2CO.shape, dtype='float64')
+# dataH2CO_avg[0] = dataH2CO[0]
+# for n in range(1, len(dataH2CO)):
+#     dataH2CO_avg[n] = (dataH2CO[n] / (n + 1)) + (dataH2CO_avg[n - 1] * (n / (n + 1)))
+#
+# print("done")
 
 # %%
 # dataH2CO_avg.tofile(path + "H2CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
 
 # %% noise analysis for H2CO
 # ll_ind, ul_ind = 19986, 21775
-ll_ind, ul_ind = 19986 + 750, 19986 + 1000
-amp = ftavgH2CO.__abs__()
-s = 2000000
-spl = spi.UnivariateSpline(freq_full[ll_ind: ul_ind], amp[ll_ind: ul_ind], s=3e5)
+# ll_ind, ul_ind = 19986 + 750, 19986 + 1000
+# amp = ftavgH2CO.__abs__()
+# s = 2000000
+# spl = spi.UnivariateSpline(freq_full[ll_ind: ul_ind], amp[ll_ind: ul_ind], s=3e5)
+# bckgnd = spl(freq_full[ll_ind:ul_ind])
+
+# double checking spline results
+# plt.figure()
+# plt.plot(amp[ll_ind:ul_ind])
+# plt.plot(bckgnd)
+
+# %%
+# noise = np.zeros(Nifgs - 1)
+# mean = np.mean(amp[ll_ind:ul_ind])
+#
+# fig, ax = plt.subplots(1, 1)
+# h = 0
+# delete_files_in_image_directory()
+#
+# for n, i in enumerate(dataH2CO_avg):
+#     amp = fft(i).__abs__()[ll_ind:ul_ind]
+#     amp += mean - np.mean(amp)
+#
+#     noise[n] = np.std(- np.log10(amp / bckgnd))
+#
+#     if n % 100 == 0:
+#         ax.clear()
+#         ax.plot(freq_full[ll_ind:ul_ind], amp)
+#         ax.plot(freq_full[ll_ind:ul_ind], bckgnd)
+#         ax.set_xlabel("DCS frequency (MHz)")
+#         ax.set_title(n)
+#         plt.savefig(f'TempImages/{h}.png')
+#         plt.pause(.001)
+#
+#         h += 1
+
+# %%
+# plt.figure()
+# plt.loglog((np.arange(Nifgs - 1) + 1) * (1 / dfr), noise)
+# plt.xlabel("time (s)")
+# plt.ylabel("absorbance noise for $\mathrm{H_2CO}$")
+
+# %% noise analysis for CO
+amp = ftavgCO.__abs__()
+ll_ind, ul_ind = 20540, 20540 + 250
+spl = spi.UnivariateSpline(freq_full[ll_ind:ul_ind], amp[ll_ind:ul_ind], s=7e4)
 bckgnd = spl(freq_full[ll_ind:ul_ind])
 
-# # double checking spline results
-# plt.figure()
 # plt.plot(amp[ll_ind:ul_ind])
 # plt.plot(bckgnd)
 
@@ -302,22 +342,32 @@ bckgnd = spl(freq_full[ll_ind:ul_ind])
 noise = np.zeros(Nifgs - 1)
 mean = np.mean(amp[ll_ind:ul_ind])
 
-fig, ax = plt.subplots(1, 1)
-for n, i in enumerate(dataH2CO_avg):
+# fig, ax = plt.subplots(1, 1)
+h = 0
+# delete_files_in_image_directory()
+
+for n, i in enumerate(dataCO_avg):
     amp = fft(i).__abs__()[ll_ind:ul_ind]
     amp += mean - np.mean(amp)
 
     noise[n] = np.std(- np.log10(amp / bckgnd))
 
     if n % 100 == 0:
-        ax.clear()
-        ax.plot(freq_full[ll_ind:ul_ind], amp)
-        ax.plot(freq_full[ll_ind:ul_ind], bckgnd)
-        ax.set_title(n)
-        plt.pause(.001)
+        print(n)
+
+        # ax.clear()
+        # ax.plot(freq_full[ll_ind:ul_ind], amp)
+        # ax.plot(freq_full[ll_ind:ul_ind], bckgnd)
+        # ax.set_xlabel("DCS frequency (MHz)")
+        # ax.set_title(n)
+        # plt.savefig(f'TempImages/{h}.png')
+        # plt.pause(.001)
+        #
+        # h += 1
 
 # %%
+clipboard_and_style_sheet.style_sheet()
 plt.figure()
 plt.loglog((np.arange(Nifgs - 1) + 1) * (1 / dfr), noise)
 plt.xlabel("time (s)")
-plt.ylabel("absorbance noise for $\mathrm{H_2CO}$")
+plt.ylabel("absorbance noise for $\mathrm{CO}$")
