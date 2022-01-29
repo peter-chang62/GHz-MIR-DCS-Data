@@ -9,6 +9,7 @@ import scipy.constants as sc
 import scipy.signal.windows as sw
 import scipy.signal as si
 import os
+import scipy.interpolate as spi
 
 
 # clipboard_and_style_sheet.style_sheet()
@@ -112,14 +113,14 @@ def ifft(x, axis=None):
 # ftavg = np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(avg)))
 
 # %% after phase correction
-# path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
-path = r"C:\Users\fastdaq\Documents\Data\01-26-2022/"
+path = r'G:\.shortcut-targets-by-id\1cPwz25CLF5JBH9c_yF0vSr5p3Bl_1-nM\MIR GHz DSC\220126/'
+# path = r"C:\Users\fastdaq\Documents\Data\01-26-2022/"
 dataH2CO = np.fromfile(path + "H2CO_filter_65483x30486_phase_corrected.bin", '<h')
 dataH2CO.resize(65483, 30486)
 
 # %%
-dataCO = np.fromfile(path + "CO_filter_65483x30486_phase_corrected.bin", '<h')
-dataCO.resize(65483, 30486)
+# dataCO = np.fromfile(path + "CO_filter_65483x30486_phase_corrected.bin", '<h')
+# dataCO.resize(65483, 30486)
 
 # %%
 Nifgs = 65484
@@ -130,109 +131,109 @@ avgH2CO = np.mean(dataH2CO, axis=0)
 ftavgH2CO = fft(avgH2CO)
 
 # %%
-avgCO = np.mean(dataCO, axis=0)
-ftavgCO = fft(avgCO)
+# avgCO = np.mean(dataCO, axis=0)
+# ftavgCO = fft(avgCO)
 
 # %% apodization
 appodH2CO = dataH2CO[:, ppifg // 2 - 200: ppifg // 2 + 200]
 
 # %% apodization
-appodCO = dataCO[:, ppifg // 2 - 200: ppifg // 2 + 200]
+# appodCO = dataCO[:, ppifg // 2 - 200: ppifg // 2 + 200]
 
 # %%
 freq_full = np.fft.fftshift(np.fft.fftfreq(len(avgH2CO), 1e-9)) * 1e-6
-freq_appod = np.fft.fftshift(np.fft.fftfreq(len(appodH2CO[0]), 1e-9)) * 1e-6
+# freq_appod = np.fft.fftshift(np.fft.fftfreq(len(appodH2CO[0]), 1e-9)) * 1e-6
 
 # %%
-fig, ax = plt.subplots(1, 1)
-ax.plot(freq_full, fft(dataH2CO[0]).__abs__(), label='single shot full')
-ax.plot(freq_appod, fft(appodH2CO[0]).__abs__(), label='single shot appodized')
-ax.plot(freq_full, ftavgH2CO.__abs__(), label=f'{Nifgs} ifgs averaged')
-ax.legend(loc='best')
-ax.set_xlim(75, 325)
-ax.set_ylim(0, 50e3)
-ax.set_xlabel("MHz")
-fig.suptitle("$\mathrm{H_2CO}$")
-
-# %%
-fig, ax = plt.subplots(1, 1)
-ax.plot(freq_full, fft(dataCO[0]).__abs__(), label='single shot full')
-ax.plot(freq_appod, fft(appodCO[0]).__abs__(), label='single shot appodized')
-ax.plot(freq_full, ftavgCO.__abs__(), label=f'{Nifgs} ifgs averaged')
-ax.legend(loc='best')
-ax.set_xlim(0, 500)
-ax.set_ylim(0, 40e3)
-ax.set_xlabel("MHz")
-fig.suptitle("$\mathrm{CO}$")
-
-# %%
-fig, ax = plt.subplots(1, 1)
-ax.plot(freq_full, ftavgH2CO.__abs__())
-ax.set_xlim(75, 325)
-ax.set_ylim(0, 15e3)
-ax.set_xlabel("MHz")
-fig.suptitle("$\mathrm{H_2CO}$")
-
-# %%
-fig, ax = plt.subplots(1, 1)
-ax.plot(freq_full, ftavgCO.__abs__())
-ax.set_xlim(0, 500)
-ax.set_ylim(0, 30e3)
-ax.set_xlabel("MHz")
-fig.suptitle("$\mathrm{CO}$")
-
-# %%
-T = np.arange(-ppifg // 2, ppifg // 2)
-fig, ax = plt.subplots(1, 2, figsize=[9.21, 4.78])
-[i.plot(T, avgH2CO) for i in ax]
-ax[0].set_xlim(-500, 500)
-ax[1].set_xlim(-100, 100)
-[i.set_xlabel("time (ns)") for i in ax]
-fig.suptitle("$\mathrm{H_2CO}$")
-
-# %%
-T = np.arange(-ppifg // 2, ppifg // 2)
-fig, ax = plt.subplots(1, 2, figsize=[9.21, 4.78])
-[i.plot(T, avgCO) for i in ax]
-ax[0].set_xlim(-500, 500)
-ax[1].set_xlim(-100, 100)
-[i.set_xlabel("time (ns)") for i in ax]
-fig.suptitle("$\mathrm{CO}$")
-
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(freq_full, fft(dataH2CO[0]).__abs__(), label='single shot full')
+# ax.plot(freq_appod, fft(appodH2CO[0]).__abs__(), label='single shot appodized')
+# ax.plot(freq_full, ftavgH2CO.__abs__(), label=f'{Nifgs} ifgs averaged')
+# ax.legend(loc='best')
+# ax.set_xlim(75, 325)
+# ax.set_ylim(0, 50e3)
+# ax.set_xlabel("MHz")
+# fig.suptitle("$\mathrm{H_2CO}$")
+#
+# # %%
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(freq_full, fft(dataCO[0]).__abs__(), label='single shot full')
+# ax.plot(freq_appod, fft(appodCO[0]).__abs__(), label='single shot appodized')
+# ax.plot(freq_full, ftavgCO.__abs__(), label=f'{Nifgs} ifgs averaged')
+# ax.legend(loc='best')
+# ax.set_xlim(0, 500)
+# ax.set_ylim(0, 40e3)
+# ax.set_xlabel("MHz")
+# fig.suptitle("$\mathrm{CO}$")
+#
+# # %%
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(freq_full, ftavgH2CO.__abs__())
+# ax.set_xlim(75, 325)
+# ax.set_ylim(0, 15e3)
+# ax.set_xlabel("MHz")
+# fig.suptitle("$\mathrm{H_2CO}$")
+#
+# # %%
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(freq_full, ftavgCO.__abs__())
+# ax.set_xlim(0, 500)
+# ax.set_ylim(0, 30e3)
+# ax.set_xlabel("MHz")
+# fig.suptitle("$\mathrm{CO}$")
+#
+# # %%
+# T = np.arange(-ppifg // 2, ppifg // 2)
+# fig, ax = plt.subplots(1, 2, figsize=[9.21, 4.78])
+# [i.plot(T, avgH2CO) for i in ax]
+# ax[0].set_xlim(-500, 500)
+# ax[1].set_xlim(-100, 100)
+# [i.set_xlabel("time (ns)") for i in ax]
+# fig.suptitle("$\mathrm{H_2CO}$")
+#
+# # %%
+# T = np.arange(-ppifg // 2, ppifg // 2)
+# fig, ax = plt.subplots(1, 2, figsize=[9.21, 4.78])
+# [i.plot(T, avgCO) for i in ax]
+# ax[0].set_xlim(-500, 500)
+# ax[1].set_xlim(-100, 100)
+# [i.set_xlabel("time (ns)") for i in ax]
+# fig.suptitle("$\mathrm{CO}$")
+#
 # %%
 fr = 1e9  # approximate
 dfr = 1 / ((1 / fr) * ppifg)
 
-wl_lim_short = [3.4, 3.7]
-nu_lim_short = sc.c / (np.array(wl_lim_short)[::-1] * 1e-6)
-wl_lim_long = [4.3, 4.8]
-nu_lim_long = sc.c / (np.array(wl_lim_long)[::-1] * 1e-6)
-
-N_nyq_short = 6
-N_nyq_long = 5
-dnu = nq.bandwidth(fr, dfr)
-window_long = np.array([dnu * (N_nyq_long - 1), dnu * N_nyq_long])
-window_short = np.array([dnu * (N_nyq_short - 1), dnu * N_nyq_short])
-freq_axis_long = np.linspace(*window_long, len(freq_full) // 2)
-freq_axis_short = np.linspace(*window_short, len(freq_full) // 2)
-wl_axis_long = sc.c * 1e6 / freq_axis_long
-wl_axis_short = sc.c * 1e6 / freq_axis_short
-
-# %%
-fig, ax = plt.subplots(1, 1)
-ax.plot(wl_axis_long, ftavgCO.__abs__()[len(freq_full) // 2:])
-ax.set_xlim(3.94, 4.89)
-ax.set_ylim(0, 30e3)
-ax.set_xlabel("wavelength $\mathrm{\mu m}$")
-fig.suptitle("$\mathrm{CO}$")
-
-# %%
-fig, ax = plt.subplots(1, 1)
-ax.plot(wl_axis_short, ftavgH2CO.__abs__()[len(freq_full) // 2:])
-ax.set_xlim(3.3, 3.9)
-ax.set_ylim(0, 15e3)
-ax.set_xlabel("wavelength $\mathrm{\mu m}$")
-fig.suptitle("$\mathrm{H_2CO}$")
+# wl_lim_short = [3.4, 3.7]
+# nu_lim_short = sc.c / (np.array(wl_lim_short)[::-1] * 1e-6)
+# wl_lim_long = [4.3, 4.8]
+# nu_lim_long = sc.c / (np.array(wl_lim_long)[::-1] * 1e-6)
+#
+# N_nyq_short = 6
+# N_nyq_long = 5
+# dnu = nq.bandwidth(fr, dfr)
+# window_long = np.array([dnu * (N_nyq_long - 1), dnu * N_nyq_long])
+# window_short = np.array([dnu * (N_nyq_short - 1), dnu * N_nyq_short])
+# freq_axis_long = np.linspace(*window_long, len(freq_full) // 2)
+# freq_axis_short = np.linspace(*window_short, len(freq_full) // 2)
+# wl_axis_long = sc.c * 1e6 / freq_axis_long
+# wl_axis_short = sc.c * 1e6 / freq_axis_short
+#
+# # %%
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(wl_axis_long, ftavgCO.__abs__()[len(freq_full) // 2:])
+# ax.set_xlim(3.94, 4.89)
+# ax.set_ylim(0, 30e3)
+# ax.set_xlabel("wavelength $\mathrm{\mu m}$")
+# fig.suptitle("$\mathrm{CO}$")
+#
+# # %%
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(wl_axis_short, ftavgH2CO.__abs__()[len(freq_full) // 2:])
+# ax.set_xlim(3.3, 3.9)
+# ax.set_ylim(0, 15e3)
+# ax.set_xlabel("wavelength $\mathrm{\mu m}$")
+# fig.suptitle("$\mathrm{H_2CO}$")
 
 # %% phase noise analysis
 # window = sw.tukey(100)
@@ -263,13 +264,15 @@ fig.suptitle("$\mathrm{H_2CO}$")
 #     plt.pause(.001)
 
 # %% averaged arrays
-dataCO_avg = np.zeros(dataCO.shape, dtype='float64')
-dataCO_avg[0] = dataCO[0]
-for n in range(1, len(dataCO)):
-    dataCO_avg[n] = (dataCO[n] / (n + 1)) + (dataCO_avg[n - 1] * (n / (n + 1)))
+# dataCO_avg = np.zeros(dataCO.shape, dtype='float64')
+# dataCO_avg[0] = dataCO[0]
+# for n in range(1, len(dataCO)):
+#     dataCO_avg[n] = (dataCO[n] / (n + 1)) + (dataCO_avg[n - 1] * (n / (n + 1)))
+#
+# print("done")
 
-print("done")
-dataCO_avg.tofile(path + "CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
+# %%
+# dataCO_avg.tofile(path + "CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
 
 # %%
 dataH2CO_avg = np.zeros(dataH2CO.shape, dtype='float64')
@@ -277,5 +280,44 @@ dataH2CO_avg[0] = dataH2CO[0]
 for n in range(1, len(dataH2CO)):
     dataH2CO_avg[n] = (dataH2CO[n] / (n + 1)) + (dataH2CO_avg[n - 1] * (n / (n + 1)))
 
-dataH2CO_avg.tofile(path + "H2CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
 print("done")
+
+# %%
+# dataH2CO_avg.tofile(path + "H2CO_filter_65483x30486_phase_corrected_AVERAGE.bin")
+
+# %% noise analysis for H2CO
+# ll_ind, ul_ind = 19986, 21775
+ll_ind, ul_ind = 19986 + 750, 19986 + 1000
+amp = ftavgH2CO.__abs__()
+s = 2000000
+spl = spi.UnivariateSpline(freq_full[ll_ind: ul_ind], amp[ll_ind: ul_ind], s=3e5)
+bckgnd = spl(freq_full[ll_ind:ul_ind])
+
+# # double checking spline results
+# plt.figure()
+# plt.plot(amp[ll_ind:ul_ind])
+# plt.plot(bckgnd)
+
+# %%
+noise = np.zeros(Nifgs - 1)
+mean = np.mean(amp[ll_ind:ul_ind])
+
+fig, ax = plt.subplots(1, 1)
+for n, i in enumerate(dataH2CO_avg):
+    amp = fft(i).__abs__()[ll_ind:ul_ind]
+    amp += mean - np.mean(amp)
+
+    noise[n] = np.std(- np.log10(amp / bckgnd))
+
+    if n % 100 == 0:
+        ax.clear()
+        ax.plot(freq_full[ll_ind:ul_ind], amp)
+        ax.plot(freq_full[ll_ind:ul_ind], bckgnd)
+        ax.set_title(n)
+        plt.pause(.001)
+
+# %%
+plt.figure()
+plt.loglog((np.arange(Nifgs - 1) + 1) * (1 / dfr), noise)
+plt.xlabel("time (s)")
+plt.ylabel("absorbance noise for $\mathrm{H_2CO}$")
