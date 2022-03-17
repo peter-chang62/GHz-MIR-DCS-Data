@@ -39,15 +39,7 @@ plt.plot(avgH2CO)
 plt.title("average H2CO")
 
 plt.figure()
-plt.plot(ftH2CO.__abs__())
-plt.title("average H2CO")
-
-plt.figure()
 plt.plot(avgCO)
-plt.title("average CO")
-
-plt.figure()
-plt.plot(ftCO.__abs__())
 plt.title("average CO")
 
 # %% Obtaining the frequency axis, at 5kHz we are in the first Nyquist window
@@ -82,6 +74,7 @@ dfrCO = nq.find_allowed_dfr(viCO, vfCO, fr)
 dfrH2CO = nq.find_allowed_dfr(viH2CO, vfH2CO, fr)
 
 # %%
+plt.figure()
 [plt.plot(i, [0, 0], 'C0') for i in dfrCO]
 [[plt.axvline(i, color='C0') for i in e] for e in dfrCO]
 [plt.plot(i, [1, 1], 'C1') for i in dfrH2CO]
