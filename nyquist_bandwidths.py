@@ -31,9 +31,9 @@ def calc_fr_for_ppifg(fr, dfr, ppifg):
     return fr + eps
 
 
-def calc_dfr_for_ppifg(fr, dfr, ppifg):
-    eps = (fr - ppifg * dfr) / ppifg
-    return dfr + eps
+def calc_dfr_for_ppifg(fr, dfr_guess, ppifg):
+    eps = (fr - ppifg * dfr_guess) / ppifg
+    return dfr_guess + eps
 
 
 # if True, then aliasing is True (bad)
