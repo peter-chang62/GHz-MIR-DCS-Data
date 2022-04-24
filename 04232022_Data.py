@@ -45,10 +45,10 @@ key = lambda f: int(f.split('LoopCount_')[1].split('_Datetime')[0])
 names = sorted(names, key=key)
 
 # %% load a single data file and throw out the time stamp
-data = np.fromfile(path + names[25], '<h')
+data = np.fromfile(path + names[67], '<h')
 data = data[:-64]
 
-# %% skip to the max of the first interferograms, and then ppifg // 2 after that
+# %% skip to the max of the first interferogram, and then ppifg // 2 after that
 start = data[:ppifg]
 ind_THREW_OUT = np.argmax(start)
 data = data[ind_THREW_OUT:]
@@ -59,7 +59,6 @@ N = len(data) // ppifg
 data = data.reshape(N, ppifg)
 
 # %% how do you find the start of the transient?
-# maybe you can find the baseline and fit it
 hey = np.copy(data)
 
 # remove all the interferograms
@@ -73,17 +72,20 @@ ind_incident_shock = np.argmax(hey.flatten())
 skip = ind_incident_shock + int(1e4)
 ind_reflected = np.argmax(hey.flatten()[skip:skip + int(2e5)]) + skip
 
+# %% to reference the time location of the shock wave of H2CO based on CO:
+# skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
+IND_TOTAL_TO_THROW = ind_THREW_OUT + ppifg // 2 + ind_reflected
+
 # %% # throw out data points up past the reflected shock wave
 data = data.flatten()
 data = data[ind_reflected:]
 
-# %% skip to the max of the first interferograms, and then ppifg // 2 after that (a copied block)
+# %% skip to the max of the first interferogram, and then NEGATIVE ppifg // 2 after that
 start = data[:ppifg]
-ind_THREW_OUT = np.argmax(start)
+ind_THREW_OUT = np.argmax(start) - ppifg // 2
 data = data[ind_THREW_OUT:]
 N = len(data) // ppifg
 data = data[:N * ppifg]
-data = data[ppifg // 2: - ppifg // 2]
 N = len(data) // ppifg
 data = data.reshape(N, ppifg)
 
@@ -145,5 +147,5 @@ plt.figure()
 plt.plot(hey.flatten())
 plt.axvline(ind_incident_shock, color='r')
 plt.axvline(ind_reflected, color='r')
-start = ind_reflected + ind_THREW_OUT + ppifg // 2
+start = ind_reflected + ind_THREW_OUT
 plt.plot(np.arange(start, start + len(data.flatten())), data.flatten())
