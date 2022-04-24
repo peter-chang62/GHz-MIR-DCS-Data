@@ -65,7 +65,7 @@ def get_ind_total_to_throw(data, ppifg):
     return IND_TOTAL_TO_THROW, hey, ind_incident, ind_reflected
 
 
-def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None, N_zoom=50):
+def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None, N_zoom=50, N_truncate=-1):
     center = ppifg // 2
 
     # %%
@@ -98,6 +98,9 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None, N_zoom
     data = data[:N * ppifg]
     N = len(data) // ppifg
     data = data.reshape(N, ppifg)
+
+    if not N_truncate == -1:
+        data = data[:N_truncate]
 
     # %% zoomed in data
     zoom = data[:, center - 200: center + 201].astype(float)
@@ -168,11 +171,79 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None, N_zoom
     return phase_corr, IND_TOTAL_TO_THROW
 
 
+def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
+    center = ppifg // 2
+    # %% zoomed in data
+    zoom = data[:, center - 200: center + 201].astype(float)
+    zoom = (zoom.T - np.mean(zoom, 1)).T
+
+    # %% appodize to remove f0, use a window of size 50
+    window = wd.blackman(N_zoom)
+    left = (len(zoom[0]) - N_zoom) // 2
+    right = len(zoom[0]) - N_zoom - left
+    window = np.pad(window, (left, right), constant_values=0)
+    zoom_appod = zoom * window
+
+    # %% calculate the shifts
+    fft_zoom = fft(zoom_appod, 1)
+    ref = fft_zoom[0]
+    fft_zoom *= np.conj(ref)
+    fft_zoom = np.pad(fft_zoom, ([0, 0], [2 ** 10, 2 ** 10]), constant_values=0.0)
+    fft_zoom = ifft(fft_zoom, 1)
+    ind = np.argmax(fft_zoom, axis=1) - len(fft_zoom[0]) // 2
+    shift = ind * len(zoom[0]) / len(fft_zoom[0])
+
+    # %% shift correct data
+    ft = np.fft.fft(np.fft.ifftshift(data, axes=1), axis=1)
+    freq = np.fft.fftfreq(len(ft[0]))
+    phase = np.zeros(data.shape).astype(np.complex128)
+    phase[:] = 1j * 2 * np.pi * freq
+    phase = (phase.T * shift).T
+    phase = np.exp(phase)
+    ft *= phase
+    ft = np.fft.fftshift(np.fft.ifft(ft, axis=1), axes=1)
+    phase_corr = ft.real
+
+    if plot:
+        # a view of the appodization method for removal of f0
+        fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
+        ax[0].plot(normalize(zoom[0]))
+        ax[0].plot(window)
+        ax[1].plot(normalize(zoom[0] * window))
+
+        # check the phase correction
+        fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
+        [ax[1].plot(i[center - 100:center + 100]) for i in phase_corr[:50]]
+        [ax[1].plot(i[center - 100:center + 100]) for i in phase_corr[-50:]]
+        [ax[0].plot(i[center - 100:center + 100]) for i in data[:50]]
+        [ax[0].plot(i[center - 100:center + 100]) for i in data[-50:]]
+        ax[0].set_title("un corrected")
+        ax[1].set_title("corrected")
+
+    return phase_corr
+
+
 # %%
 path_co = r'C:\Users\fastdaq\Desktop\ShockTubeData\Surf_18\card1/'
 path_h2co = r'C:\Users\fastdaq\Desktop\ShockTubeData\Surf_18\card2/'
 ppifg = 17511
 
 # %%
-co, ind = analyze(path_co, ppifg, 15, True)
-h2co, _ = analyze(path_h2co, ppifg, 15, True, ind, N_zoom=25)
+# co, ind = analyze(path_co, ppifg, 15, True, N_truncate=100)
+# h2co, _ = analyze(path_h2co, ppifg, 15, True, ind, N_zoom=25, N_truncate=100)
+
+# %% the whole thing
+N = 10
+CO = np.zeros((N, ppifg))
+H2CO = np.zeros((N, ppifg))
+
+for i in range(1, N + 1):
+    co, ind = analyze(path_co, ppifg, i, plot=False, IND_TOTAL_TO_THROW=None, N_zoom=50, N_truncate=20)
+    h2co, _ = analyze(path_h2co, ppifg, i, plot=False, IND_TOTAL_TO_THROW=ind, N_zoom=25, N_truncate=20)
+
+    CO[i - 1] = np.mean(co, 0)
+    H2CO[i - 1] = np.mean(h2co, 0)
+
+    print(i)
+
+Phase_Correct(H2CO, ppifg, 25, True)
