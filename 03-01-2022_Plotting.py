@@ -43,25 +43,27 @@ plt.plot(avgCO)
 plt.title("average CO")
 
 # %% Obtaining the frequency axis, at 5kHz we are in the first Nyquist window
-fr = 1e9  # I forgot to record it, oh well...
+ppifg = 199728
+
+fr = 1000137106  # I forgot to record it, oh well...
 dfr = nq.calc_dfr_for_ppifg(fr, dfr_guess=5e3, ppifg=199728)
 dnu = nq.bandwidth(fr, dfr)
-freq = np.linspace(0, dnu, len(ftCO) // 2)
+freq = np.linspace(0, dnu, ppifg // 2)
 
 # %%
 startind = int(60e3)
 plt.figure()
 plt.title("frequency")
-plt.plot(freq[startind:] * 1e-12, normalize(ftCO.__abs__()[len(ftCO) // 2:][startind:]))
-plt.plot(freq[startind:] * 1e-12, normalize(ftH2CO.__abs__()[len(ftCO) // 2:][startind:]))
+plt.plot(freq[startind:] * 1e-12, normalize(ftCO.__abs__()[ppifg // 2:][startind:]))
+plt.plot(freq[startind:] * 1e-12, normalize(ftH2CO.__abs__()[ppifg // 2:][startind:]))
 plt.xlabel("Frequency (THz)")
 
 # %%
 wl = sc.c * 1e6 / freq[startind:]
 plt.figure()
 plt.title("wavelength")
-plt.plot(wl, normalize(ftCO.__abs__()[len(ftCO) // 2:][startind:]))
-plt.plot(wl, normalize(ftH2CO.__abs__()[len(ftCO) // 2:][startind:]))
+plt.plot(wl, normalize(ftCO.__abs__()[ppifg // 2:][startind:]))
+plt.plot(wl, normalize(ftH2CO.__abs__()[ppifg // 2:][startind:]))
 plt.xlabel("Wavelength ($\mathrm{\mu m}$)")
 
 # %% CO nyquist window
