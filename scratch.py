@@ -61,6 +61,7 @@ def get_ind_total_to_throw(data, ppifg):
     # %% to reference the time location of the shock wave of H2CO based on CO:
     # skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
     IND_TOTAL_TO_THROW = ind_THREW_OUT + ppifg // 2 + ind_reflected
+
     return IND_TOTAL_TO_THROW, hey, ind_incident, ind_reflected
 
 
@@ -84,7 +85,7 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None):
 
     data = data[IND_TOTAL_TO_THROW:]
 
-    # %% skip to the max of the first interferogram, and then NEGATIVE ppifg // 2 after that
+    # %% skip to the max of the first interferogram, and then NEGATIVE or POSITIVE ppifg // 2 after that
     start = data[:ppifg]
     ind_THREW_OUT = np.argmax(abs(start))
     if ind_THREW_OUT > ppifg // 2:
