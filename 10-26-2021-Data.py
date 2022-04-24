@@ -35,7 +35,7 @@ N_ifgs = len(data) // ppifg
 data = data[:N_ifgs * ppifg]
 data.resize(N_ifgs, ppifg)
 
-# %% limit amount to averge
+# %% limit amount to average
 # n_avg = 100
 # data = data[:n_avg]
 
@@ -80,7 +80,7 @@ fig, ax = plt.subplots(1, 1)
 ax.plot(wl_axis, ft_avg[:len(ft_avg) // 2].__abs__())
 ax.set_xlim(3.5, 4.5)
 ax.set_ylim(0, 0.8)
-ax.set_xlabel("$\mathrm{\mu m}$")
+ax.set_xlabel("$\\mathrm{\\mu m}$")
 # plt.savefig("10-26-2021-Data.png")
 
 t2 = time.time()
