@@ -65,7 +65,7 @@ def get_ind_total_to_throw(data, ppifg):
     return IND_TOTAL_TO_THROW, hey, ind_incident, ind_reflected
 
 
-def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None):
+def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None, N_zoom=50):
     center = ppifg // 2
 
     # %%
@@ -104,10 +104,9 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None):
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
     # %% appodize to remove f0, use a window of size 50
-    N = 50
-    window = wd.blackman(N)
-    left = (len(zoom[0]) - N) // 2
-    right = len(zoom[0]) - N - left
+    window = wd.blackman(N_zoom)
+    left = (len(zoom[0]) - N_zoom) // 2
+    right = len(zoom[0]) - N_zoom - left
     window = np.pad(window, (left, right), constant_values=0)
     zoom_appod = zoom * window
 
@@ -134,14 +133,19 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None):
     # %% a lot of diagnostic plots
     if plot:
         # check the phase correction
-        plt.figure()
-        [plt.plot(i[center - 100:center + 100]) for i in phase_corr[:50]]
-        [plt.plot(i[center - 100:center + 100]) for i in phase_corr[-50:]]
+        fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
+        [ax[1].plot(i[center - 100:center + 100]) for i in phase_corr[:50]]
+        [ax[1].plot(i[center - 100:center + 100]) for i in phase_corr[-50:]]
+        [ax[0].plot(i[center - 100:center + 100]) for i in data[:50]]
+        [ax[0].plot(i[center - 100:center + 100]) for i in data[-50:]]
+        ax[0].set_title("un corrected")
+        ax[1].set_title("corrected")
 
         # a view of the appodization method for removal of f0
-        plt.figure()
-        plt.plot(normalize(zoom[0]))
-        plt.plot(window)
+        fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
+        ax[0].plot(normalize(zoom[0]))
+        ax[0].plot(window)
+        ax[1].plot(normalize(zoom[0] * window))
 
         # average time domain
         plt.figure()
@@ -165,10 +169,10 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None):
 
 
 # %%
-path_co = r'D:\ShockTubeData\Data_04232022\Surf_18\card1/'
-path_h2co = r'D:\ShockTubeData\Data_04232022\Surf_18\card2/'
+path_co = r'C:\Users\fastdaq\Desktop\ShockTubeData\Surf_18\card1/'
+path_h2co = r'C:\Users\fastdaq\Desktop\ShockTubeData\Surf_18\card2/'
 ppifg = 17511
 
 # %%
-co, ind = analyze(path_co, ppifg, 12, True)
-h2co, _ = analyze(path_h2co, ppifg, 12, True, ind)
+co, ind = analyze(path_co, ppifg, 15, True)
+h2co, _ = analyze(path_h2co, ppifg, 15, True, ind, N_zoom=25)
