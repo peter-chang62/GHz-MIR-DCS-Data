@@ -224,13 +224,13 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
 
 
 # %%
-path_co = r'C:\Users\fastdaq\Desktop\ShockTubeData\Surf_18\card1/'
-path_h2co = r'C:\Users\fastdaq\Desktop\ShockTubeData\Surf_18\card2/'
+path_co = r'D:\ShockTubeData\Data_04232022\Surf_18\card1/'
+path_h2co = r'D:\ShockTubeData\Data_04232022\Surf_18\card2/'
 ppifg = 17511
 
 # %%
-# co, ind = analyze(path_co, ppifg, 15, True, N_truncate=100)
-# h2co, _ = analyze(path_h2co, ppifg, 15, True, ind, N_zoom=25, N_truncate=100)
+co, ind = analyze(path_co, ppifg, 15, True, N_truncate=100)
+h2co, _ = analyze(path_h2co, ppifg, 15, True, ind, N_zoom=25, N_truncate=100)
 
 # %% the whole thing
 N = 10
@@ -246,4 +246,16 @@ for i in range(1, N + 1):
 
     print(i)
 
-Phase_Correct(H2CO, ppifg, 25, True)
+# %%
+center = ppifg // 2
+zoom = H2CO[:, center - 200:center + 201]
+zoom = (zoom.T - np.mean(zoom, 1)).T
+window = np.blackman(25)
+left = (len(zoom[0]) - len(window)) // 2
+right = len(zoom[0]) - len(window) - left
+window = np.pad(window, (left, right), constant_values=0)
+zoom *= window
+
+ftzoom = fft(zoom, 1)
+ftzoom *= np.conj(ftzoom[0])
+corr = np.pad(ftzoom, ())
