@@ -34,6 +34,18 @@ def normalize(vec):
     return vec / np.max(abs(vec))
 
 
+def get_data(path, N_toanalyze):
+    names = [i.name for i in os.scandir(path)]
+    key = lambda f: int(f.split('LoopCount_')[1].split('_Datetime')[0])
+    names = sorted(names, key=key)
+
+    # %% load a single data file and throw out the time stamp
+    data = np.fromfile(path + names[N_toanalyze], '<h')
+    data = data[:-64]
+
+    return data
+
+
 def get_ind_total_to_throw(data, ppifg):
     center = ppifg // 2
 
@@ -69,13 +81,7 @@ def analyze(path, ppifg, N_toanalyze, plot=True, IND_TOTAL_TO_THROW=None, N_zoom
     center = ppifg // 2
 
     # %%
-    names = [i.name for i in os.scandir(path)]
-    key = lambda f: int(f.split('LoopCount_')[1].split('_Datetime')[0])
-    names = sorted(names, key=key)
-
-    # %% load a single data file and throw out the time stamp
-    data = np.fromfile(path + names[N_toanalyze], '<h')
-    data = data[:-64]
+    data = get_data(path, N_toanalyze)
 
     if IND_TOTAL_TO_THROW is None:
         plot_hey = True
@@ -222,40 +228,53 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
 
     return phase_corr
 
-
 # %%
 path_co = r'D:\ShockTubeData\Data_04232022\Surf_18\card1/'
 path_h2co = r'D:\ShockTubeData\Data_04232022\Surf_18\card2/'
 ppifg = 17511
 
 # %%
-co, ind = analyze(path_co, ppifg, 15, True, N_truncate=100)
-h2co, _ = analyze(path_h2co, ppifg, 15, True, ind, N_zoom=25, N_truncate=100)
+N_Truncate = 100
+
+co, ind = analyze(path=path_co,
+                  ppifg=ppifg,
+                  N_toanalyze=15,
+                  plot=True,
+                  IND_TOTAL_TO_THROW=None,
+                  N_truncate=N_Truncate)
+h2co, _ = analyze(path=path_h2co,
+                  ppifg=ppifg,
+                  N_toanalyze=15,
+                  plot=True,
+                  IND_TOTAL_TO_THROW=ind,
+                  N_zoom=25,
+                  N_truncate=N_Truncate)
 
 # %% the whole thing
-N = 10
-CO = np.zeros((N, ppifg))
-H2CO = np.zeros((N, ppifg))
-
-for i in range(1, N + 1):
-    co, ind = analyze(path_co, ppifg, i, plot=False, IND_TOTAL_TO_THROW=None, N_zoom=50, N_truncate=20)
-    h2co, _ = analyze(path_h2co, ppifg, i, plot=False, IND_TOTAL_TO_THROW=ind, N_zoom=25, N_truncate=20)
-
-    CO[i - 1] = np.mean(co, 0)
-    H2CO[i - 1] = np.mean(h2co, 0)
-
-    print(i)
-
-# %%
-center = ppifg // 2
-zoom = H2CO[:, center - 200:center + 201]
-zoom = (zoom.T - np.mean(zoom, 1)).T
-window = np.blackman(25)
-left = (len(zoom[0]) - len(window)) // 2
-right = len(zoom[0]) - len(window) - left
-window = np.pad(window, (left, right), constant_values=0)
-zoom *= window
-
-ftzoom = fft(zoom, 1)
-ftzoom *= np.conj(ftzoom[0])
-corr = np.pad(ftzoom, ())
+# N_shocks = 10
+# N_Truncate = 20
+# CO = np.zeros((N_shocks, ppifg * N_Truncate))
+# H2CO = np.zeros((N_shocks, ppifg * N_Truncate))
+#
+# for i in range(1, N_shocks + 1):
+#     co, ind = analyze(path_co, ppifg, i, plot=False, IND_TOTAL_TO_THROW=None, N_zoom=50, N_truncate=N_Truncate)
+#     h2co, _ = analyze(path_h2co, ppifg, i, plot=False, IND_TOTAL_TO_THROW=ind, N_zoom=25, N_truncate=N_Truncate)
+#
+#     CO[i - 1] = co.flatten()
+#     H2CO[i - 1] = h2co.flatten()
+#
+#     print(i)
+#
+# # %%
+# # center = ppifg // 2
+# # zoom = H2CO[:, center - 200:center + 201]
+# # zoom = (zoom.T - np.mean(zoom, 1)).T
+# # window = np.blackman(25)
+# # left = (len(zoom[0]) - len(window)) // 2
+# # right = len(zoom[0]) - len(window) - left
+# # window = np.pad(window, (left, right), constant_values=0)
+# # zoom *= window
+# #
+# # ftzoom = fft(zoom, 1)
+# # ftzoom *= np.conj(ftzoom[0])
+# # corr = np.pad(ftzoom, ())
