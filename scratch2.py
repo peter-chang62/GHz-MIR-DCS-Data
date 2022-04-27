@@ -67,6 +67,11 @@ plt.figure()
 plt.plot(array)
 plt.plot(s.real)
 
+# %%
 plt.figure()
 plt.plot(array)
 plt.plot(array - s.real)
+
+filtered_fft = pc.fft(array - s.real)
+plt.figure()
+plt.plot(filtered_fft.__abs__())
