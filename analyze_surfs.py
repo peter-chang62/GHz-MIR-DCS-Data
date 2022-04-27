@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
-import figure_out_phasecorr as pc
+import phase_correction as pc
 
 
 def rad_to_deg(rad):
