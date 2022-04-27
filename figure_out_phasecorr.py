@@ -42,10 +42,15 @@ def deg_to_rad(deg):
     return deg * np.pi / 180
 
 
-def get_data(path, N_toanalyze):
+def Number_of_files(path):
+    names = [i.name for i in os.scandir(path)]
+    return len(names)
+
+
+def get_data(path, N_file):
     """
     :param path: path to data folder containing all the segment files
-    :param N_toanalyze: which segment file to analyze (starting from 1)
+    :param N_file: which segment file to analyze (starting from 1)
     :return: data as a 1D array
     """
     names = [i.name for i in os.scandir(path)]
@@ -53,7 +58,7 @@ def get_data(path, N_toanalyze):
     names = sorted(names, key=key)
 
     # %% load a single data file and throw out the time stamp
-    data = np.fromfile(path + names[N_toanalyze], '<h')
+    data = np.fromfile(path + names[N_file], '<h')
     data = data[:-64]
 
     return data
@@ -124,6 +129,19 @@ def adjust_data_and_reshape(data, ppifg):
     return data, ind
 
 
+def shift_2d(data, shifts):
+    ft = mkl_fft.fft(np.fft.ifftshift(data, axes=1), axis=1)  # fftshifted
+    freq = np.fft.fftfreq(len(ft[0]))
+    phase = np.zeros(data.shape).astype(np.complex128)
+    phase[:] = 1j * 2 * np.pi * freq
+    phase = (phase.T * shifts).T
+    phase = np.exp(phase)
+    ft *= phase
+    ft = np.fft.fftshift(mkl_fft.ifft(ft, axis=1), axes=1)
+    phase_corr = ft.real
+    return phase_corr
+
+
 def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     """
     :param data: data as a 2D array
@@ -134,6 +152,7 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     :return: phase corrected data as a 2D array
     """
     center = ppifg // 2
+
     # %% zoomed in data
     zoom = data[:, center - 200: center + 201].astype(float)
     zoom = (zoom.T - np.mean(zoom, 1)).T
@@ -155,15 +174,7 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     shift = ind * len(zoom[0]) / len(fft_zoom[0])
 
     # %% shift correct data
-    ft = np.fft.fft(np.fft.ifftshift(data, axes=1), axis=1)
-    freq = np.fft.fftfreq(len(ft[0]))
-    phase = np.zeros(data.shape).astype(np.complex128)
-    phase[:] = 1j * 2 * np.pi * freq
-    phase = (phase.T * shift).T
-    phase = np.exp(phase)
-    ft *= phase
-    ft = np.fft.fftshift(np.fft.ifft(ft, axis=1), axes=1)
-    phase_corr = ft.real
+    phase_corr = shift_2d(data, shift)
 
     if plot:
         # a view of the appodization method for removal of f0
@@ -181,4 +192,40 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
         ax[0].set_title("un corrected")
         ax[1].set_title("corrected")
 
-    return phase_corr
+    return phase_corr, shift
+
+
+def fix_sign(data, ind_ll, ind_ul):
+    """
+    :param data: 2D array
+    :param ind_ll: integer
+    :param ind_ul: integer
+
+    :return: data with signs fixed, 2D array
+    1D array of signs
+    """
+
+    FFT = fft(data, 1)
+    DIFF = np.zeros(len(FFT))
+
+    # %%
+    ref = FFT[0]
+    for n, i in enumerate(FFT):
+        phase1 = np.unwrap(np.arctan2(ref[ind_ll:ind_ul].imag, ref[ind_ll:ind_ul].real))
+        phase2 = np.unwrap(np.arctan2(i[ind_ll:ind_ul].imag, i[ind_ll:ind_ul].real))
+
+        pfit1 = np.polyfit(np.arange(len(phase1)), phase1, 1)
+        pfit2 = np.polyfit(np.arange(len(phase2)), phase2, 1)
+
+        diff = pfit1 - pfit2
+
+        remainder = diff[1] % (2 * np.pi)
+        sgn = np.where(remainder < np.pi, 1, -1)
+
+        i *= sgn
+        FFT[n] = i
+        DIFF[n] = sgn  # higher order first
+
+    back = ifft(FFT, 1).real
+    back = (back.T - np.mean(back, 1)).T
+    return back, DIFF
