@@ -75,7 +75,7 @@ def get_ind_total_to_throw(data, ppifg):
     """
     center = ppifg // 2
 
-    # %% skip to the max of the first interferogram, and then ppifg // 2 after that
+    # skip to the max of the first interferogram, and then ppifg // 2 after that
     start = data[:ppifg]
     ind_THREW_OUT = np.argmax(start)
     data = data[ind_THREW_OUT:]
@@ -85,7 +85,7 @@ def get_ind_total_to_throw(data, ppifg):
     N = len(data) // ppifg
     data = data.reshape(N, ppifg)
 
-    # %% how do you find the start of the transient?
+    # how do you find the start of the transient?
     bckgnd = np.copy(data)
     # remove all the interferograms
     bckgnd[:, center - 50:center + 50] = 0.0
@@ -96,7 +96,7 @@ def get_ind_total_to_throw(data, ppifg):
     skip = ind_incident + int(1e4)
     ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
 
-    # %% skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
+    # skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
     ind_incident += ind_THREW_OUT + ppifg // 2
     ind_reflected += ind_THREW_OUT + ppifg // 2
 
@@ -163,13 +163,13 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     right = len(zoom[0]) - N_zoom - left
     window = np.pad(window, (left, right), constant_values=0)
 
-    windows = np.zeros(zoom.shape)
+    WINDOWS = np.zeros(zoom.shape)
     for n, i in enumerate(zoom):
         ind = np.argmax(abs(i) ** 2)
         roll = ind - len(zoom[0]) // 2
-        windows[n] = np.roll(window, roll)
+        WINDOWS[n] = np.roll(window, roll)
 
-    zoom_appod = zoom * windows
+    zoom_appod = zoom * WINDOWS
 
     # calculate the shifts
     fft_zoom = fft(zoom_appod, 1)
@@ -187,7 +187,7 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
         # a view of the appodization method for removal of f0
         fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
         ax[0].plot(normalize(zoom[0]))
-        ax[0].plot(windows[0])
+        ax[0].plot(WINDOWS[0])
         ax[1].plot(normalize(zoom_appod[0]))
 
         # check the phase correction
