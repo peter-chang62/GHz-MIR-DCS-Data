@@ -21,8 +21,8 @@ def deg_to_rad(deg):
 # center = ppifg // 2
 
 # %%
-# path_co = r'D:\ShockTubeData\04242022\Surf_27\card1/'
-# path_h2co = r'D:\ShockTubeData\04242022\Surf_27\card2/'
+# path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
+# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
 # ppifg = 17507
 # center = ppifg // 2
 
@@ -45,7 +45,7 @@ for n in range(N_shocks):
 
     # co = co[ind_r:]
     # co, _ = pc.adjust_data_and_reshape(co, ppifg)
-    # co = co[:30]
+    # co = co[:N_ifgs]
     # co, _ = pc.Phase_Correct(co, ppifg, 50, False)
 
     h2co = pc.get_data(path_h2co, n)
@@ -59,22 +59,62 @@ for n in range(N_shocks):
 
     print(n)
 
+"""Combine shocks for H2CO"""
+
 # %% # calculate the average for each shock
 avg_per_shock = np.zeros((N_shocks, ppifg))
 for n, i in enumerate(H2CO):
     avg_per_shock[n] = np.mean(i, 0)
 
-# %% the ll and ul give the indices for the positive frequency range where H2CO has appreciable signal
-# calculate the shift needed to average different shocks together
-ll, ul = 1120 + ppifg // 2, 3600 + ppifg // 2
-avg_per_shock, shifts, sgns = pc.fix_sign_and_phase_correct(avg_per_shock, ll, ul, ppifg, 25, True, 10)
-avg_per_shock, shifts2, sgns2 = pc.fix_sign_and_phase_correct(avg_per_shock, ll, ul, ppifg, 10, True, 10)
-shifts += shifts2
-sgns *= sgns2
+# %%
+ref = avg_per_shock[0]
+SGN = np.zeros(len(avg_per_shock))
+SHIFTS = np.zeros(len(avg_per_shock))
+for n, i in enumerate(avg_per_shock):
+    arr1 = np.vstack([ref, i])
+    arr2 = np.vstack([ref, -i])
+
+    ifg1, shift1 = pc.Phase_Correct(arr1, ppifg, 25, False)
+    ifg2, shift2 = pc.Phase_Correct(arr2, ppifg, 25, False)
+    shift1 = shift1[1]
+    shift2 = shift2[1]
+    ifg1 = ifg1[1]
+    ifg2 = ifg2[1]
+
+    diff1 = np.mean(abs(ref[center - 50:center + 50] - ifg1[center - 50: center + 50]))
+    diff2 = np.mean(abs(ref[center - 50:center + 50] - ifg2[center - 50: center + 50]))
+
+    if diff1 < diff2:
+        avg_per_shock[n] = ifg1
+        SGN[n] = 1
+        SHIFTS[n] = shift1
+    else:
+        avg_per_shock[n] = ifg2
+        SGN[n] = -1
+        SHIFTS[n] = shift2
+
+    if n % 100 == 0:
+        print(len(avg_per_shock) - n)
 
 # %% shift separate shocks so that you can average different shocks together
 for n, i in enumerate(H2CO):
-    i *= sgns[n]
-    i = pc.shift_2d(i, np.repeat(shifts[n], N_ifgs))
+    i *= SGN[n]
+    i = pc.shift_2d(i, np.repeat(SHIFTS[n], N_ifgs))
     H2CO[n] = i
-    print(n)
+    print(len(H2CO) - n)
+
+"""Combine shocks for CO"""
+
+# %% calculate the average for each shock
+# avg_per_shock = np.zeros((N_shocks, ppifg))
+# for n, i in enumerate(CO):
+#     avg_per_shock[n] = np.mean(i, 0)
+
+# %% calculate the shift needed to average different shocks together
+# avg_per_shock, shifts = pc.Phase_Correct(avg_per_shock, ppifg, 50, True)
+
+# %% shift separate shocks so that you can average different shocks together
+# for n, i in enumerate(CO):
+#     i = pc.shift_2d(i, np.repeat(shifts[n], N_ifgs))
+#     CO[n] = i
+#     print(len(CO) - n)

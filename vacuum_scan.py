@@ -9,29 +9,25 @@ clipboard_and_style_sheet.style_sheet()
 
 # %%
 h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card2_114204x17507.bin', '<h')
-co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card1_114204x17507.bin', '<h')
 N_ifgs = 114204
 ppifg = 17507
 center = ppifg // 2
-
-# %%
 h2co, ind = pc.adjust_data_and_reshape(h2co, ppifg)
 
-# %%
-ll, ul = 1120 + ppifg // 2, 3600 + ppifg // 2
+# %% packs of 50 were what I had used when analyzing the shock data
 
-# %%
+"""for sign correction, it appears you need to have some SNR to begin with, so the packs of 50 also to serve that 
+purpose """
+
 h = 0
 done = False
 ref = h2co[0]
 AVG = []
-# N_stop = int(1e4)
 N_stop = N_ifgs
 step = 50
 while h < N_stop:
     section = h2co[h: h + step]
     section, shift = pc.Phase_Correct(section, ppifg, 25, False)
-    # section, shift, sgn = pc.fix_sign_and_phase_correct(section, ll, ul, ppifg, 25, False, 10)
     AVG.append(np.mean(section, 0))
 
     h2co[h: h + step] = section
@@ -43,6 +39,9 @@ while h < N_stop:
 AVG = np.array(AVG)
 
 # %%
+"""It turns out that this is a simpler and better way to correct the sign difference than what you did in 
+fix_sign_and_phase_correct. I've switched everything over now. """
+
 avg = np.copy(AVG)
 ref = avg[0]
 SGN = np.zeros(len(avg))
@@ -88,3 +87,23 @@ plt.figure()
 plt.plot(freq, fft_ref.__abs__(), label='background')
 plt.plot(freq, fft_data.__abs__(), label='data')
 plt.legend(loc='best')
+
+"""CO vacuum scan"""
+# %%
+co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card1_114204x17507.bin', '<h')
+N_ifgs = 114204
+ppifg = 17507
+center = ppifg // 2
+co, ind = pc.adjust_data_and_reshape(co, ppifg)
+
+# %%
+h = 0
+ref = co[0]
+step = 200
+while h < len(co):
+    section = np.vstack([ref, co[h:h + step]])
+    section, shift = pc.Phase_Correct(section, ppifg, 50, False)
+    section = section[1:]
+    co[h:h + step] = section
+    print(len(co) - h)
+    h += step
