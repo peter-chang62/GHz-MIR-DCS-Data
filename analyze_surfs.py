@@ -12,39 +12,6 @@ def deg_to_rad(deg):
     return deg * np.pi / 180
 
 
-def fix_sign_and_phase_correct(data, ind_ll, ind_ul, ppifg, N_zoom, plot, tries=1):
-    """
-    :param data: 2D array
-    :param ind_ll:
-    :param ind_ul:
-    :param ppifg:
-    :param N_zoom:
-    :param plot:
-    :param tries:
-
-    :return:
-    """
-    SHIFTS = np.zeros(len(data))
-    SGNS = np.ones(len(data))
-
-    assert tries >= 1
-    assert isinstance(tries, int)
-
-    for i in range(tries):
-        data, sgns = pc.fix_sign(data, ind_ll, ind_ul)
-        data, shifts = pc.Phase_Correct(data, ppifg, N_zoom, plot=False)
-
-        SGNS *= sgns
-        SHIFTS += shifts
-
-    if plot:
-        center = ppifg // 2
-        plt.figure()
-        [plt.plot(i[center - 100:center + 100]) for i in data]
-
-    return data, SHIFTS, SGNS
-
-
 """Data paths """
 
 # %%
@@ -100,8 +67,8 @@ for n, i in enumerate(H2CO):
 # %% the ll and ul give the indices for the positive frequency range where H2CO has appreciable signal
 # calculate the shift needed to average different shocks together
 ll, ul = 1120 + ppifg // 2, 3600 + ppifg // 2
-avg_per_shock, shifts, sgns = fix_sign_and_phase_correct(avg_per_shock, ll, ul, ppifg, 25, True, 10)
-avg_per_shock, shifts2, sgns2 = fix_sign_and_phase_correct(avg_per_shock, ll, ul, ppifg, 10, True, 10)
+avg_per_shock, shifts, sgns = pc.fix_sign_and_phase_correct(avg_per_shock, ll, ul, ppifg, 25, True, 10)
+avg_per_shock, shifts2, sgns2 = pc.fix_sign_and_phase_correct(avg_per_shock, ll, ul, ppifg, 10, True, 10)
 shifts += shifts2
 sgns *= sgns2
 

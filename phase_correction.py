@@ -153,18 +153,25 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     """
     center = ppifg // 2
 
-    # %% zoomed in data
+    # zoomed in data
     zoom = data[:, center - 200: center + 201].astype(float)
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
-    # %% appodize to remove f0, use a window of size 50
+    # appodize to remove f0, use a window of size 50
     window = wd.blackman(N_zoom)
     left = (len(zoom[0]) - N_zoom) // 2
     right = len(zoom[0]) - N_zoom - left
     window = np.pad(window, (left, right), constant_values=0)
-    zoom_appod = zoom * window
 
-    # %% calculate the shifts
+    windows = np.zeros(zoom.shape)
+    for n, i in enumerate(zoom):
+        ind = np.argmax(abs(i) ** 2)
+        roll = ind - len(zoom[0]) // 2
+        windows[n] = np.roll(window, roll)
+
+    zoom_appod = zoom * windows
+
+    # calculate the shifts
     fft_zoom = fft(zoom_appod, 1)
     ref = fft_zoom[0]
     fft_zoom *= np.conj(ref)
@@ -173,15 +180,15 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     ind = np.argmax(fft_zoom, axis=1) - len(fft_zoom[0]) // 2
     shift = ind * len(zoom[0]) / len(fft_zoom[0])
 
-    # %% shift correct data
+    # shift correct data
     phase_corr = shift_2d(data, shift)
 
     if plot:
         # a view of the appodization method for removal of f0
         fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
         ax[0].plot(normalize(zoom[0]))
-        ax[0].plot(window)
-        ax[1].plot(normalize(zoom[0] * window))
+        ax[0].plot(windows[0])
+        ax[1].plot(normalize(zoom_appod[0]))
 
         # check the phase correction
         fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
@@ -229,3 +236,36 @@ def fix_sign(data, ind_ll, ind_ul):
     back = ifft(FFT, 1).real
     back = (back.T - np.mean(back, 1)).T
     return back, DIFF
+
+
+def fix_sign_and_phase_correct(data, ind_ll, ind_ul, ppifg, N_zoom, plot, tries=1):
+    """
+    :param data: 2D array
+    :param ind_ll:
+    :param ind_ul:
+    :param ppifg:
+    :param N_zoom:
+    :param plot:
+    :param tries:
+
+    :return:
+    """
+    SHIFTS = np.zeros(len(data))
+    SGNS = np.ones(len(data))
+
+    assert tries >= 1
+    assert isinstance(tries, int)
+
+    for i in range(tries):
+        data, sgns = fix_sign(data, ind_ll, ind_ul)
+        data, shifts = Phase_Correct(data, ppifg, N_zoom, plot=False)
+
+        SGNS *= sgns
+        SHIFTS += shifts
+
+    if plot:
+        center = ppifg // 2
+        plt.figure()
+        [plt.plot(i[center - 100:center + 100]) for i in data]
+
+    return data, SHIFTS, SGNS
