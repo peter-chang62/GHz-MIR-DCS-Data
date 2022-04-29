@@ -8,12 +8,12 @@ import mkl_fft
 clipboard_and_style_sheet.style_sheet()
 
 # %%
-h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card2_114204x17507.bin', '<h')
+h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\after_data/long_shock_card2_228408x17507.bin', '<h')
 ppifg = 17507
 center = ppifg // 2
 N_zoom = 24
 h2co, ind = pc.adjust_data_and_reshape(h2co, ppifg)
-h2co = h2co[-5000:]
+# h2co = h2co[-5000:]
 
 # %%
 h = 0
