@@ -12,6 +12,7 @@ h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card2_1142
 N_ifgs = 114204
 ppifg = 17507
 center = ppifg // 2
+N_zoom = 24
 h2co, ind = pc.adjust_data_and_reshape(h2co, ppifg)
 
 # %% packs of 50 were what I had used when analyzing the shock data
@@ -20,14 +21,13 @@ h2co, ind = pc.adjust_data_and_reshape(h2co, ppifg)
 purpose """
 
 h = 0
-done = False
 ref = h2co[0]
 AVG = []
 N_stop = N_ifgs
 step = 50
 while h < N_stop:
     section = h2co[h: h + step]
-    section, shift = pc.Phase_Correct(section, ppifg, 25, False)
+    section, shift = pc.Phase_Correct(section, ppifg, N_zoom, False)
     AVG.append(np.mean(section, 0))
 
     h2co[h: h + step] = section
@@ -49,11 +49,12 @@ for n, i in enumerate(avg):
     arr1 = np.vstack([ref, i])
     arr2 = np.vstack([ref, -i])
 
-    ifg1 = pc.Phase_Correct(arr1, ppifg, 25, False)[0][1]
-    ifg2 = pc.Phase_Correct(arr2, ppifg, 25, False)[0][1]
-
-    diff1 = np.mean(abs(ref[center - 50:center + 50] - ifg1[center - 50: center + 50]))
-    diff2 = np.mean(abs(ref[center - 50:center + 50] - ifg2[center - 50: center + 50]))
+    ifg1 = pc.Phase_Correct(arr1, ppifg, N_zoom, False)[0][1]
+    ifg2 = pc.Phase_Correct(arr2, ppifg, N_zoom, False)[0][1]
+    
+    window = N_zoom // 2
+    diff1 = np.mean(abs(ref[center - window:center + window] - ifg1[center - window: center + window]))
+    diff2 = np.mean(abs(ref[center - window:center + window] - ifg2[center - window: center + window]))
 
     if diff1 < diff2:
         avg[n] = ifg1
@@ -90,20 +91,20 @@ plt.legend(loc='best')
 
 """CO vacuum scan"""
 # %%
-co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card1_114204x17507.bin', '<h')
-N_ifgs = 114204
-ppifg = 17507
-center = ppifg // 2
-co, ind = pc.adjust_data_and_reshape(co, ppifg)
+# co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card1_114204x17507.bin', '<h')
+# N_ifgs = 114204
+# ppifg = 17507
+# center = ppifg // 2
+# co, ind = pc.adjust_data_and_reshape(co, ppifg)
 
 # %%
-h = 0
-ref = co[0]
-step = 200
-while h < len(co):
-    section = np.vstack([ref, co[h:h + step]])
-    section, shift = pc.Phase_Correct(section, ppifg, 50, False)
-    section = section[1:]
-    co[h:h + step] = section
-    print(len(co) - h)
-    h += step
+# h = 0
+# ref = co[0]
+# step = 200
+# while h < len(co):
+#     section = np.vstack([ref, co[h:h + step]])
+#     section, shift = pc.Phase_Correct(section, ppifg, 50, False)
+#     section = section[1:]
+#     co[h:h + step] = section
+#     print(len(co) - h)
+#     h += step

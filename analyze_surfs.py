@@ -21,20 +21,21 @@ def deg_to_rad(deg):
 # center = ppifg // 2
 
 # %%
-# path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
-# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
-# ppifg = 17507
-# center = ppifg // 2
-
-# %%
-path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
-path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
+path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
+path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
 ppifg = 17507
 center = ppifg // 2
+
+# %%
+# path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
+# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
+# ppifg = 17507
+# center = ppifg // 2
 
 # %% The arrays are 3D, with indexing going as N_shock, N_ifg, ppifg
 N_ifgs = 50  # look at 50 interferograms post shock
 N_shocks = pc.Number_of_files(path_co)
+N_zoom = 24
 H2CO = np.zeros((N_shocks, N_ifgs, ppifg))
 # CO = np.zeros((N_shocks, N_ifgs, ppifg))
 
@@ -47,17 +48,16 @@ for n in range(N_shocks):
     # co, _ = pc.adjust_data_and_reshape(co, ppifg)
     # co = co[:N_ifgs]
     # co, _ = pc.Phase_Correct(co, ppifg, 50, False)
+    # CO[n][:] = co
 
     h2co = pc.get_data(path_h2co, n)
     h2co = h2co[ind_r:]
     h2co, _ = pc.adjust_data_and_reshape(h2co, ppifg)
     h2co = h2co[:N_ifgs]
-    h2co, _ = pc.Phase_Correct(h2co, ppifg, 25, False)
-
+    h2co, _ = pc.Phase_Correct(h2co, ppifg, N_zoom, False)
     H2CO[n][:] = h2co
-    # CO[n][:] = co
 
-    print(n)
+    print(N_shocks - n)
 
 """Combine shocks for H2CO"""
 
@@ -74,15 +74,16 @@ for n, i in enumerate(avg_per_shock):
     arr1 = np.vstack([ref, i])
     arr2 = np.vstack([ref, -i])
 
-    ifg1, shift1 = pc.Phase_Correct(arr1, ppifg, 25, False)
-    ifg2, shift2 = pc.Phase_Correct(arr2, ppifg, 25, False)
+    ifg1, shift1 = pc.Phase_Correct(arr1, ppifg, N_zoom, False)
+    ifg2, shift2 = pc.Phase_Correct(arr2, ppifg, N_zoom, False)
     shift1 = shift1[1]
     shift2 = shift2[1]
     ifg1 = ifg1[1]
     ifg2 = ifg2[1]
-
-    diff1 = np.mean(abs(ref[center - 50:center + 50] - ifg1[center - 50: center + 50]))
-    diff2 = np.mean(abs(ref[center - 50:center + 50] - ifg2[center - 50: center + 50]))
+    
+    window = N_zoom // 2
+    diff1 = np.mean(abs(ref[center - window:center + window] - ifg1[center - window: center + window]))
+    diff2 = np.mean(abs(ref[center - window:center + window] - ifg2[center - window: center + window]))
 
     if diff1 < diff2:
         avg_per_shock[n] = ifg1
