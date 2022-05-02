@@ -75,7 +75,7 @@ def get_ind_total_to_throw(data, ppifg):
     """
     center = ppifg // 2
 
-    # %% skip to the max of the first interferogram, and then ppifg // 2 after that
+    # skip to the max of the first interferogram, and then ppifg // 2 after that
     start = data[:ppifg]
     ind_THREW_OUT = np.argmax(start)
     data = data[ind_THREW_OUT:]
@@ -85,7 +85,7 @@ def get_ind_total_to_throw(data, ppifg):
     N = len(data) // ppifg
     data = data.reshape(N, ppifg)
 
-    # %% how do you find the start of the transient?
+    # how do you find the start of the transient?
     bckgnd = np.copy(data)
     # remove all the interferograms
     bckgnd[:, center - 50:center + 50] = 0.0
@@ -96,7 +96,7 @@ def get_ind_total_to_throw(data, ppifg):
     skip = ind_incident + int(1e4)
     ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
 
-    # %% skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
+    # skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
     ind_incident += ind_THREW_OUT + ppifg // 2
     ind_reflected += ind_THREW_OUT + ppifg // 2
 
@@ -153,18 +153,25 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     """
     center = ppifg // 2
 
-    # %% zoomed in data
+    # zoomed in data
     zoom = data[:, center - 200: center + 201].astype(float)
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
-    # %% appodize to remove f0, use a window of size 50
+    # appodize to remove f0, use a window of size 50
     window = wd.blackman(N_zoom)
     left = (len(zoom[0]) - N_zoom) // 2
     right = len(zoom[0]) - N_zoom - left
     window = np.pad(window, (left, right), constant_values=0)
-    zoom_appod = zoom * window
 
-    # %% calculate the shifts
+    WINDOWS = np.zeros(zoom.shape)
+    for n, i in enumerate(zoom):
+        ind = np.argmax(abs(i) ** 2)
+        roll = ind - len(zoom[0]) // 2
+        WINDOWS[n] = np.roll(window, roll)
+
+    zoom_appod = zoom * WINDOWS
+
+    # calculate the shifts
     fft_zoom = fft(zoom_appod, 1)
     ref = fft_zoom[0]
     fft_zoom *= np.conj(ref)
@@ -173,15 +180,15 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     ind = np.argmax(fft_zoom, axis=1) - len(fft_zoom[0]) // 2
     shift = ind * len(zoom[0]) / len(fft_zoom[0])
 
-    # %% shift correct data
+    # shift correct data
     phase_corr = shift_2d(data, shift)
 
     if plot:
         # a view of the appodization method for removal of f0
         fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
         ax[0].plot(normalize(zoom[0]))
-        ax[0].plot(window)
-        ax[1].plot(normalize(zoom[0] * window))
+        ax[0].plot(WINDOWS[0])
+        ax[1].plot(normalize(zoom_appod[0]))
 
         # check the phase correction
         fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
@@ -195,37 +202,72 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     return phase_corr, shift
 
 
-def fix_sign(data, ind_ll, ind_ul):
-    """
-    :param data: 2D array
-    :param ind_ll: integer
-    :param ind_ul: integer
+"""Not using the functions below anymore """
 
-    :return: data with signs fixed, 2D array
-    1D array of signs
-    """
-
-    FFT = fft(data, 1)
-    DIFF = np.zeros(len(FFT))
-
-    # %%
-    ref = FFT[0]
-    for n, i in enumerate(FFT):
-        phase1 = np.unwrap(np.arctan2(ref[ind_ll:ind_ul].imag, ref[ind_ll:ind_ul].real))
-        phase2 = np.unwrap(np.arctan2(i[ind_ll:ind_ul].imag, i[ind_ll:ind_ul].real))
-
-        pfit1 = np.polyfit(np.arange(len(phase1)), phase1, 1)
-        pfit2 = np.polyfit(np.arange(len(phase2)), phase2, 1)
-
-        diff = pfit1 - pfit2
-
-        remainder = diff[1] % (2 * np.pi)
-        sgn = np.where(remainder < np.pi, 1, -1)
-
-        i *= sgn
-        FFT[n] = i
-        DIFF[n] = sgn  # higher order first
-
-    back = ifft(FFT, 1).real
-    back = (back.T - np.mean(back, 1)).T
-    return back, DIFF
+# def fix_sign(data, ind_ll, ind_ul):
+#     """
+#     :param data: 2D array
+#     :param ind_ll: integer
+#     :param ind_ul: integer
+#
+#     :return: data with signs fixed, 2D array
+#     1D array of signs
+#     """
+#
+#     FFT = fft(data, 1)
+#     DIFF = np.zeros(len(FFT))
+#
+#     # %%
+#     ref = FFT[0]
+#     for n, i in enumerate(FFT):
+#         phase1 = np.unwrap(np.arctan2(ref[ind_ll:ind_ul].imag, ref[ind_ll:ind_ul].real))
+#         phase2 = np.unwrap(np.arctan2(i[ind_ll:ind_ul].imag, i[ind_ll:ind_ul].real))
+#
+#         pfit1 = np.polyfit(np.arange(len(phase1)), phase1, 1)
+#         pfit2 = np.polyfit(np.arange(len(phase2)), phase2, 1)
+#
+#         diff = pfit1 - pfit2
+#
+#         remainder = diff[1] % (2 * np.pi)
+#         sgn = np.where(remainder < np.pi, 1, -1)
+#
+#         i *= sgn
+#         FFT[n] = i
+#         DIFF[n] = sgn  # higher order first
+#
+#     back = ifft(FFT, 1).real
+#     back = (back.T - np.mean(back, 1)).T
+#     return back, DIFF
+#
+#
+# def fix_sign_and_phase_correct(data, ind_ll, ind_ul, ppifg, N_zoom, plot, tries=1):
+#     """
+#     :param data: 2D array
+#     :param ind_ll:
+#     :param ind_ul:
+#     :param ppifg:
+#     :param N_zoom:
+#     :param plot:
+#     :param tries:
+#
+#     :return:
+#     """
+#     SHIFTS = np.zeros(len(data))
+#     SGNS = np.ones(len(data))
+#
+#     assert tries >= 1
+#     assert isinstance(tries, int)
+#
+#     for i in range(tries):
+#         data, sgns = fix_sign(data, ind_ll, ind_ul)
+#         data, shifts = Phase_Correct(data, ppifg, N_zoom, plot=False)
+#
+#         SGNS *= sgns
+#         SHIFTS += shifts
+#
+#     if plot:
+#         center = ppifg // 2
+#         plt.figure()
+#         [plt.plot(i[center - 100:center + 100]) for i in data]
+#
+#     return data, SHIFTS, SGNS
