@@ -154,7 +154,7 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
     center = ppifg // 2
 
     # zoomed in data
-    zoom = data[:, center - 200: center + 201].astype(float)
+    zoom = data[:, center - (N_zoom + 0): center + (N_zoom + 1)].astype(float)
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
     # appodize to remove f0, use a window of size 50
