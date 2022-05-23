@@ -1,6 +1,5 @@
 import numpy as np
 import mkl_fft
-import PyQt5.QtWidgets as qt
 from scipy.signal import windows as wd
 import os
 import matplotlib.pyplot as plt
