@@ -138,16 +138,16 @@ for n in range(len(surf_28_h2co)):
 
 # %%
 """Now that surfs are combined, average across all the shocks"""
-surf_27_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x50x17507.bin')
-surf_27_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/H2CO_499x50x17507.bin')
+surf_27_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x70x17507.bin')
+surf_27_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/H2CO_499x70x17507.bin')
 
-surf_28_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x50x17507.bin')
-surf_28_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/H2CO_299x50x17507.bin')
+surf_28_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x70x17507.bin')
+surf_28_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/H2CO_299x70x17507.bin')
 
-surf_27_co.resize((499, 50, 17507))
-surf_27_h2co.resize((499, 50, 17507))
-surf_28_co.resize((299, 50, 17507))
-surf_28_h2co.resize((299, 50, 17507))
+surf_27_co.resize((499, 70, 17507))
+surf_27_h2co.resize((499, 70, 17507))
+surf_28_co.resize((299, 70, 17507))
+surf_28_h2co.resize((299, 70, 17507))
 
 avg_surf_27_co = np.mean(surf_27_co, axis=0)
 avg_surf_27_h2co = np.mean(surf_27_h2co, axis=0)
