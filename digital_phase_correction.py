@@ -112,10 +112,6 @@ while h < len(data[::]):
     # apply_f0_shift(fcdiff[h: h + step], hilbert, t)
     # td = hilbert.real
 
-    # hilbert = ss.hilbert(td)
-    # apply_phi0_shift(pdiff2[h: h + step], hilbert)
-    # hilbert = hilbert.real
-
     hilbert = ss.hilbert(td)
     apply_phi0_shift(pdiff[h: h + step], hilbert)
     hilbert = hilbert.real
