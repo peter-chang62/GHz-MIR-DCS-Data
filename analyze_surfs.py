@@ -2,15 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
 import phase_correction as pc
-
-
-def rad_to_deg(rad):
-    return rad * 180 / np.pi
-
-
-def deg_to_rad(deg):
-    return deg * np.pi / 180
-
+import digital_phase_correction as dpc
 
 """Data paths """
 
@@ -21,101 +13,147 @@ def deg_to_rad(deg):
 # center = ppifg // 2
 
 # %%
-path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
-path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
+# path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
+# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
+# ppifg = 17507
+# center = ppifg // 2
+
+# %%
+path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
+path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
 ppifg = 17507
 center = ppifg // 2
 
-# %%
-# path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
-# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
-# ppifg = 17507
-# center = ppifg // 2
+"""Initialize arrays and specify what interferograms to look at """
 
 # %% The arrays are 3D, with indexing going as N_shock, N_ifg, ppifg
 N_ifgs = 50  # look at 50 interferograms post shock
 N_shocks = pc.Number_of_files(path_co)
 N_zoom = 24
 H2CO = np.zeros((N_shocks, N_ifgs, ppifg))
-# CO = np.zeros((N_shocks, N_ifgs, ppifg))
+CO = np.zeros((N_shocks, N_ifgs, ppifg))
+
+""" Phase correct each shock"""
 
 # %% phase correct data for each shock
+ll_freq_h2co = 0.0597
+ul_freq_h2co = 0.20
+ll_freq_co = 0.15
+ul_freq_co = 0.25
 for n in range(N_shocks):
     co = pc.get_data(path_co, n)
     ind_i, ind_r = pc.get_ind_total_to_throw(co, ppifg)
 
-    # co = co[ind_r:]
-    # co, _ = pc.adjust_data_and_reshape(co, ppifg)
-    # co = co[:N_ifgs]
-    # co, _ = pc.Phase_Correct(co, ppifg, 50, False)
-    # CO[n][:] = co
+    co = co[ind_r:]
+    co, _ = pc.adjust_data_and_reshape(co, ppifg)
+    co = co[:N_ifgs]
+
+    p_co = dpc.get_pdiff(co, ppifg, ll_freq_co, ul_freq_co, 200)
+    dpc.apply_t0_and_phi0_shift(p_co, co)
+
+    CO[n][:] = co
 
     h2co = pc.get_data(path_h2co, n)
     h2co = h2co[ind_r:]
     h2co, _ = pc.adjust_data_and_reshape(h2co, ppifg)
     h2co = h2co[:N_ifgs]
-    h2co, _ = pc.Phase_Correct(h2co, ppifg, N_zoom, False)
+
+    p_h2co = dpc.get_pdiff(h2co, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
+    dpc.apply_t0_and_phi0_shift(p_h2co, h2co)
+
     H2CO[n][:] = h2co
 
     print(N_shocks - n)
 
-"""Combine shocks for H2CO"""
+"""Combine shocks"""
 
 # %% # calculate the average for each shock
-avg_per_shock = np.zeros((N_shocks, ppifg))
-for n, i in enumerate(H2CO):
-    avg_per_shock[n] = np.mean(i, 0)
+avg_shock_H2CO = np.zeros((N_shocks, ppifg))
+avg_shock_CO = np.zeros((N_shocks, ppifg))
+for n in range(len(H2CO)):
+    avg_shock_H2CO[n] = np.mean(H2CO[n], 0)
+    avg_shock_CO[n] = np.mean(CO[n], 0)
+
+p_avg_shock_H2CO = dpc.get_pdiff(avg_shock_H2CO, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
+dpc.apply_t0_and_phi0_shift(p_avg_shock_H2CO, avg_shock_H2CO)
+
+p_avg_shock_CO = dpc.get_pdiff(avg_shock_CO, ppifg, ll_freq_co, ul_freq_co, 200)
+dpc.apply_t0_and_phi0_shift(p_avg_shock_CO, avg_shock_CO)
 
 # %%
-ref = avg_per_shock[0]
-SGN = np.zeros(len(avg_per_shock))
-SHIFTS = np.zeros(len(avg_per_shock))
-for n, i in enumerate(avg_per_shock):
-    arr1 = np.vstack([ref, i])
-    arr2 = np.vstack([ref, -i])
+for n in range(len(H2CO)):
+    p = np.repeat(p_avg_shock_H2CO[n][:, np.newaxis], N_ifgs, 1).T
+    dpc.apply_t0_and_phi0_shift(p, H2CO[n])
 
-    ifg1, shift1 = pc.Phase_Correct(arr1, ppifg, N_zoom, False)
-    ifg2, shift2 = pc.Phase_Correct(arr2, ppifg, N_zoom, False)
-    shift1 = shift1[1]
-    shift2 = shift2[1]
-    ifg1 = ifg1[1]
-    ifg2 = ifg2[1]
-    
-    window = N_zoom // 2
-    diff1 = np.mean(abs(ref[center - window:center + window] - ifg1[center - window: center + window]))
-    diff2 = np.mean(abs(ref[center - window:center + window] - ifg2[center - window: center + window]))
+    p = np.repeat(p_avg_shock_CO[n][:, np.newaxis], N_ifgs, 1).T
+    dpc.apply_t0_and_phi0_shift(p, CO[n])
 
-    if diff1 < diff2:
-        avg_per_shock[n] = ifg1
-        SGN[n] = 1
-        SHIFTS[n] = shift1
-    else:
-        avg_per_shock[n] = ifg2
-        SGN[n] = -1
-        SHIFTS[n] = shift2
-
-    if n % 100 == 0:
-        print(len(avg_per_shock) - n)
-
-# %% shift separate shocks so that you can average different shocks together
-for n, i in enumerate(H2CO):
-    i *= SGN[n]
-    i = pc.shift_2d(i, np.repeat(SHIFTS[n], N_ifgs))
-    H2CO[n] = i
     print(len(H2CO) - n)
 
-"""Combine shocks for CO"""
+# %%
+"""Combine surfs, call this after you've run the above cells and saved the phase corrected data """
 
-# %% calculate the average for each shock
-# avg_per_shock = np.zeros((N_shocks, ppifg))
-# for n, i in enumerate(CO):
-#     avg_per_shock[n] = np.mean(i, 0)
+surf_27_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x50x17507.bin')
+surf_27_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/H2CO_499x50x17507.bin')
 
-# %% calculate the shift needed to average different shocks together
-# avg_per_shock, shifts = pc.Phase_Correct(avg_per_shock, ppifg, 50, True)
+surf_28_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x50x17507.bin')
+surf_28_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/H2CO_299x50x17507.bin')
 
-# %% shift separate shocks so that you can average different shocks together
-# for n, i in enumerate(CO):
-#     i = pc.shift_2d(i, np.repeat(shifts[n], N_ifgs))
-#     CO[n] = i
-#     print(len(CO) - n)
+surf_27_co.resize((499, 50, 17507))
+surf_27_h2co.resize((499, 50, 17507))
+surf_28_co.resize((299, 50, 17507))
+surf_28_h2co.resize((299, 50, 17507))
+
+ppifg = 17507
+center = ppifg // 2
+ll_freq_h2co = 0.0597
+ul_freq_h2co = 0.20
+ll_freq_co = 0.15
+ul_freq_co = 0.25
+
+N_ifgs = 50
+
+# %%
+avg_surf_27_co = np.mean(surf_27_co, axis=(0, 1))
+avg_surf_27_h2co = np.mean(surf_27_h2co, axis=(0, 1))
+avg_surf_28_co = np.mean(surf_28_co, axis=(0, 1))
+avg_surf_28_h2co = np.mean(surf_28_h2co, axis=(0, 1))
+
+avg_co = np.vstack([avg_surf_27_co, avg_surf_28_co])
+avg_h2co = np.vstack([avg_surf_27_h2co, avg_surf_28_h2co])
+
+# %%
+p_h2co = dpc.get_pdiff(avg_h2co, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
+p_co = dpc.get_pdiff(avg_co, ppifg, ll_freq_co, ul_freq_co, 200)
+
+dpc.apply_t0_and_phi0_shift(p_h2co, avg_h2co)
+dpc.apply_t0_and_phi0_shift(p_co, avg_co)
+
+# %%
+p_h2co_rep = np.repeat(p_h2co[1][:, np.newaxis], N_ifgs, 1).T
+p_co_rep = np.repeat(p_co[1][:, np.newaxis], N_ifgs, 1).T
+for n in range(len(surf_28_h2co)):
+    dpc.apply_t0_and_phi0_shift(p_h2co_rep, surf_28_h2co[n])
+    dpc.apply_t0_and_phi0_shift(p_co_rep, surf_28_co[n])
+    print(len(surf_28_h2co) - n)
+
+# %%
+"""Now that surfs are combined, average across all the shocks"""
+surf_27_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x50x17507.bin')
+surf_27_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/H2CO_499x50x17507.bin')
+
+surf_28_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x50x17507.bin')
+surf_28_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/H2CO_299x50x17507.bin')
+
+surf_27_co.resize((499, 50, 17507))
+surf_27_h2co.resize((499, 50, 17507))
+surf_28_co.resize((299, 50, 17507))
+surf_28_h2co.resize((299, 50, 17507))
+
+avg_surf_27_co = np.mean(surf_27_co, axis=0)
+avg_surf_27_h2co = np.mean(surf_27_h2co, axis=0)
+avg_surf_28_co = np.mean(surf_28_co, axis=0)
+avg_surf_28_h2co = np.mean(surf_28_h2co, axis=0)
+
+avg_co = (avg_surf_27_co + avg_surf_28_co) / 2
+avg_h2co = (avg_surf_27_h2co + avg_surf_28_h2co) / 2

@@ -48,40 +48,14 @@ def get_pdiff(data, ppifg, ll_freq, ul_freq, Nzoom=200):
     return pdiff
 
 
-# %%
-path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
-ppifg = 17507
-center = ppifg // 2
-data = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card2_114204x17507.bin', '<h')
-data, _ = pc.adjust_data_and_reshape(data, ppifg)
-
-ll_freq = 0.0597
-ul_freq = 0.20
-
-# %%
-pdiff = get_pdiff(data, ppifg, ll_freq, ul_freq, 200)
-
-# %%
-h = 0
-step = 250
-freq = np.fft.fftshift(np.fft.fftfreq(len(data[0])))
-t = np.arange(-len(freq) // 2, len(freq) // 2)
-while h < len(data[::]):
-    sec = data[h: h + step]
-
-    fft = pc.fft(sec, 1)
-    apply_t0_shift(pdiff[h: h + step], freq, fft)
+def apply_t0_and_phi0_shift(pdiff, data):
+    freq = np.fft.fftshift(np.fft.fftfreq(len(data[0])))
+    fft = pc.fft(data, 1)
+    apply_t0_shift(pdiff, freq, fft)
     td = pc.ifft(fft, 1).real
 
     hbt = ss.hilbert(td)
-    apply_phi0_shift(pdiff[h: h + step], hbt)
+    apply_phi0_shift(pdiff, hbt)
     hbt = hbt.real
 
-    data[h:h + step] = hbt.real
-
-    h += step
-    print(len(data) - h)
-
-# %%
-avg = np.mean(data, 0)
-fft = pc.fft(avg)
+    data[:] = hbt.real
