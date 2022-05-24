@@ -13,23 +13,22 @@ import digital_phase_correction as dpc
 # center = ppifg // 2
 
 # %%
-# path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
-# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
-# ppifg = 17507
-# center = ppifg // 2
-
-# %%
-path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
-path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
+path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
+path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
 ppifg = 17507
 center = ppifg // 2
+
+# %%
+# path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
+# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
+# ppifg = 17507
+# center = ppifg // 2
 
 """Initialize arrays and specify what interferograms to look at """
 
 # %% The arrays are 3D, with indexing going as N_shock, N_ifg, ppifg
-N_ifgs = 50  # look at 50 interferograms post shock
+N_ifgs = 70  # look at 50 interferograms post shock
 N_shocks = pc.Number_of_files(path_co)
-N_zoom = 24
 H2CO = np.zeros((N_shocks, N_ifgs, ppifg))
 CO = np.zeros((N_shocks, N_ifgs, ppifg))
 
@@ -42,25 +41,25 @@ ll_freq_co = 0.15
 ul_freq_co = 0.25
 for n in range(N_shocks):
     co = pc.get_data(path_co, n)
-    ind_i, ind_r = pc.get_ind_total_to_throw(co, ppifg)
-
-    co = co[ind_r:]
     co, _ = pc.adjust_data_and_reshape(co, ppifg)
-    co = co[:N_ifgs]
+    co = co.flatten()
+    ind_i, ind_r = pc.get_ind_total_to_throw(co, ppifg)
+    ind = int(np.round(ind_i / ppifg) * ppifg)
+    co = co[ind - ppifg * 20: ind + ppifg * 50]
+    co = co.reshape((70, ppifg))
 
     p_co = dpc.get_pdiff(co, ppifg, ll_freq_co, ul_freq_co, 200)
     dpc.apply_t0_and_phi0_shift(p_co, co)
-
     CO[n][:] = co
 
     h2co = pc.get_data(path_h2co, n)
-    h2co = h2co[ind_r:]
     h2co, _ = pc.adjust_data_and_reshape(h2co, ppifg)
-    h2co = h2co[:N_ifgs]
+    h2co = h2co.flatten()
+    h2co = h2co[ind - ppifg * 20: ind + ppifg * 50]
+    h2co = h2co.reshape((70, ppifg))
 
     p_h2co = dpc.get_pdiff(h2co, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
     dpc.apply_t0_and_phi0_shift(p_h2co, h2co)
-
     H2CO[n][:] = h2co
 
     print(N_shocks - n)
@@ -93,16 +92,16 @@ for n in range(len(H2CO)):
 # %%
 """Combine surfs, call this after you've run the above cells and saved the phase corrected data """
 
-surf_27_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x50x17507.bin')
-surf_27_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/H2CO_499x50x17507.bin')
+surf_27_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x70x17507.bin')
+surf_27_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/H2CO_499x70x17507.bin')
 
-surf_28_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x50x17507.bin')
-surf_28_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/H2CO_299x50x17507.bin')
+surf_28_co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x70x17507.bin')
+surf_28_h2co = np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/H2CO_299x70x17507.bin')
 
-surf_27_co.resize((499, 50, 17507))
-surf_27_h2co.resize((499, 50, 17507))
-surf_28_co.resize((299, 50, 17507))
-surf_28_h2co.resize((299, 50, 17507))
+surf_27_co.resize((499, 70, 17507))
+surf_27_h2co.resize((499, 70, 17507))
+surf_28_co.resize((299, 70, 17507))
+surf_28_h2co.resize((299, 70, 17507))
 
 ppifg = 17507
 center = ppifg // 2
@@ -111,7 +110,7 @@ ul_freq_h2co = 0.20
 ll_freq_co = 0.15
 ul_freq_co = 0.25
 
-N_ifgs = 50
+N_ifgs = 70
 
 # %%
 avg_surf_27_co = np.mean(surf_27_co, axis=(0, 1))
