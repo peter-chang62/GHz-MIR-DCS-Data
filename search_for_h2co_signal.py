@@ -21,10 +21,11 @@ fft_h2co_bckgnd = pc.fft(h2co_bckgnd).__abs__()
 fig, ax = plt.subplots(1, 1)
 # ll, ul = 12800, 13150
 ll, ul = 11400, 12400
-for i in h2co[-10:]:
+for i in h2co[19:40]:
     ax.clear()
     fft = pc.fft(i)
-    ax.plot(-np.log(fft[ll:ul].__abs__() / fft_h2co_bckgnd[ll:ul].__abs__()))
+    absorb = -np.log(fft[ll:ul].__abs__() / fft_h2co_bckgnd[ll:ul].__abs__())
+    ax.plot(absorb)
     # ax.set_ylim(0, .55)
     ax.set_ylim(0, .4)
-    plt.pause(1)
+    plt.pause(0.5)
