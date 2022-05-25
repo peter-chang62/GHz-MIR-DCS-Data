@@ -56,7 +56,7 @@ def get_data(path, N_file):
     key = lambda f: int(f.split('LoopCount_')[1].split('_Datetime')[0])
     names = sorted(names, key=key)
 
-    # %% load a single data file and throw out the time stamp
+    # load a single data file and throw out the time stamp
     data = np.fromfile(path + names[N_file], '<h')
     data = data[:-64]
 
@@ -199,74 +199,3 @@ def t0_correct_via_cross_corr(data, N_zoom=50, plot=True):
         ax[1].set_title("corrected")
 
     return phase_corr, shift
-
-
-"""Not using the functions below anymore """
-
-# def fix_sign(data, ind_ll, ind_ul):
-#     """
-#     :param data: 2D array
-#     :param ind_ll: integer
-#     :param ind_ul: integer
-#
-#     :return: data with signs fixed, 2D array
-#     1D array of signs
-#     """
-#
-#     FFT = fft(data, 1)
-#     DIFF = np.zeros(len(FFT))
-#
-#     # %%
-#     ref = FFT[0]
-#     for n, i in enumerate(FFT):
-#         phase1 = np.unwrap(np.arctan2(ref[ind_ll:ind_ul].imag, ref[ind_ll:ind_ul].real))
-#         phase2 = np.unwrap(np.arctan2(i[ind_ll:ind_ul].imag, i[ind_ll:ind_ul].real))
-#
-#         pfit1 = np.polyfit(np.arange(len(phase1)), phase1, 1)
-#         pfit2 = np.polyfit(np.arange(len(phase2)), phase2, 1)
-#
-#         diff = pfit1 - pfit2
-#
-#         remainder = diff[1] % (2 * np.pi)
-#         sgn = np.where(remainder < np.pi, 1, -1)
-#
-#         i *= sgn
-#         FFT[n] = i
-#         DIFF[n] = sgn  # higher order first
-#
-#     back = ifft(FFT, 1).real
-#     back = (back.T - np.mean(back, 1)).T
-#     return back, DIFF
-#
-#
-# def fix_sign_and_phase_correct(data, ind_ll, ind_ul, ppifg, N_zoom, plot, tries=1):
-#     """
-#     :param data: 2D array
-#     :param ind_ll:
-#     :param ind_ul:
-#     :param ppifg:
-#     :param N_zoom:
-#     :param plot:
-#     :param tries:
-#
-#     :return:
-#     """
-#     SHIFTS = np.zeros(len(data))
-#     SGNS = np.ones(len(data))
-#
-#     assert tries >= 1
-#     assert isinstance(tries, int)
-#
-#     for i in range(tries):
-#         data, sgns = fix_sign(data, ind_ll, ind_ul)
-#         data, shifts = Phase_Correct(data, ppifg, N_zoom, plot=False)
-#
-#         SGNS *= sgns
-#         SHIFTS += shifts
-#
-#     if plot:
-#         center = ppifg // 2
-#         plt.figure()
-#         [plt.plot(i[center - 100:center + 100]) for i in data]
-#
-#     return data, SHIFTS, SGNS
