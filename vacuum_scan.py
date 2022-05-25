@@ -24,8 +24,6 @@ pdiff_co = dpc.get_pdiff(data, ppifg, ll_freq_co, ul_freq_co, 200)
 # %%
 h = 0
 step = 250
-freq = np.fft.fftshift(np.fft.fftfreq(len(data[0])))
-t = np.arange(-len(freq) // 2, len(freq) // 2)
 while h < len(data):
     # dpc.apply_t0_and_phi0_shift(pdiff_h2co[h: h + step], data[h: h + step])
     dpc.apply_t0_and_phi0_shift(pdiff_co[h: h + step], data[h: h + step])

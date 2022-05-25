@@ -7,6 +7,17 @@ import scipy.integrate as si
 import scipy.signal as ss
 
 
+# useful for plotting and determining good apodization window
+# to fit spectral phase
+def get_phase(dat, N_apod):
+    ppifg = len(dat)
+    center = ppifg // 2
+    fft = pc.fft(dat[center - N_apod // 2: center + N_apod // 2])
+    phase = np.unwrap(np.arctan2(fft.imag, fft.real))
+    freq = np.fft.fftshift(np.fft.fftfreq(len(phase)))
+    return freq, phase, fft.__abs__()
+
+
 def apply_t0_shift(pdiff, freq, fft):
     # the polynomial fits the spectral phase in radians,
     # so the factor of 2 pi is already there
