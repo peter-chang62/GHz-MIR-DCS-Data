@@ -18,8 +18,8 @@ ll_freq_h2co = 0.0597
 ul_freq_h2co = 0.20
 ll_freq_co = 0.15
 ul_freq_co = 0.25
-# pdiff_h2co = dpc.get_pdiff(data, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
-pdiff_co = dpc.get_pdiff(data, ppifg, ll_freq_co, ul_freq_co, 200)
+# pdiff_h2co = dpc.get_pdiff(data, ll_freq_h2co, ul_freq_h2co, 200)
+pdiff_co = dpc.get_pdiff(data, ll_freq_co, ul_freq_co, 200)
 
 # %%
 h = 0

@@ -30,7 +30,7 @@ def apply_phi0_shift(pdiff, hbt):
     hbt[:] *= np.exp(1j * pdiff[:, 1][:, np.newaxis])
 
 
-def get_pdiff(data, ppifg, ll_freq, ul_freq, Nzoom=200):
+def get_pdiff(data, ll_freq, ul_freq, Nzoom=200):
     """
     :param data: 2D array of IFG's, row column order
     :param ppifg: int, length of each interferogram
@@ -42,7 +42,7 @@ def get_pdiff(data, ppifg, ll_freq, ul_freq, Nzoom=200):
     :return: pdiff, polynomial coefficients, higher order first
     """
 
-    center = ppifg // 2
+    center = len(data[0]) // 2
     zoom = data[:, center - Nzoom // 2:center + Nzoom // 2]
     zoom = (zoom.T - np.mean(zoom, 1)).T
 

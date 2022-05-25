@@ -24,7 +24,7 @@ data, _ = pc.adjust_data_and_reshape(data, ppifg)
 
 # %%
 ll_freq, ul_freq = 0.425, 0.452
-p = dpc.get_pdiff(data, ppifg, ll_freq, ul_freq, Nzoom=400)
+p = dpc.get_pdiff(data, ll_freq, ul_freq, Nzoom=400)
 h = 0
 step = 250
 while h < len(data):

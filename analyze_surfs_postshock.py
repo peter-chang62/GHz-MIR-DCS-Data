@@ -47,7 +47,7 @@ for n in range(N_shocks):
     co, _ = pc.adjust_data_and_reshape(co, ppifg)
     co = co[:N_ifgs]
 
-    p_co = dpc.get_pdiff(co, ppifg, ll_freq_co, ul_freq_co, 200)
+    p_co = dpc.get_pdiff(co, ll_freq_co, ul_freq_co, 200)
     dpc.apply_t0_and_phi0_shift(p_co, co)
 
     CO[n][:] = co
@@ -57,7 +57,7 @@ for n in range(N_shocks):
     h2co, _ = pc.adjust_data_and_reshape(h2co, ppifg)
     h2co = h2co[:N_ifgs]
 
-    p_h2co = dpc.get_pdiff(h2co, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
+    p_h2co = dpc.get_pdiff(h2co, ll_freq_h2co, ul_freq_h2co, 200)
     dpc.apply_t0_and_phi0_shift(p_h2co, h2co)
 
     H2CO[n][:] = h2co
@@ -73,10 +73,10 @@ for n in range(len(H2CO)):
     avg_shock_H2CO[n] = np.mean(H2CO[n], 0)
     avg_shock_CO[n] = np.mean(CO[n], 0)
 
-p_avg_shock_H2CO = dpc.get_pdiff(avg_shock_H2CO, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
+p_avg_shock_H2CO = dpc.get_pdiff(avg_shock_H2CO, ll_freq_h2co, ul_freq_h2co, 200)
 dpc.apply_t0_and_phi0_shift(p_avg_shock_H2CO, avg_shock_H2CO)
 
-p_avg_shock_CO = dpc.get_pdiff(avg_shock_CO, ppifg, ll_freq_co, ul_freq_co, 200)
+p_avg_shock_CO = dpc.get_pdiff(avg_shock_CO, ll_freq_co, ul_freq_co, 200)
 dpc.apply_t0_and_phi0_shift(p_avg_shock_CO, avg_shock_CO)
 
 # %%
@@ -122,8 +122,8 @@ avg_co = np.vstack([avg_surf_27_co, avg_surf_28_co])
 avg_h2co = np.vstack([avg_surf_27_h2co, avg_surf_28_h2co])
 
 # %%
-p_h2co = dpc.get_pdiff(avg_h2co, ppifg, ll_freq_h2co, ul_freq_h2co, 200)
-p_co = dpc.get_pdiff(avg_co, ppifg, ll_freq_co, ul_freq_co, 200)
+p_h2co = dpc.get_pdiff(avg_h2co, ll_freq_h2co, ul_freq_h2co, 200)
+p_co = dpc.get_pdiff(avg_co, ll_freq_co, ul_freq_co, 200)
 
 dpc.apply_t0_and_phi0_shift(p_h2co, avg_h2co)
 dpc.apply_t0_and_phi0_shift(p_co, avg_co)
