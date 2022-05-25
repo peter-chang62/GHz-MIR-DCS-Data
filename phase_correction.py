@@ -141,7 +141,7 @@ def shift_2d(data, shifts):
     return phase_corr
 
 
-def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
+def t0_correct_via_cross_corr(data, N_zoom=50, plot=True):
     """
     :param data: data as a 2D array
     :param ppifg: points per interferogram
@@ -150,7 +150,7 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
 
     :return: phase corrected data as a 2D array
     """
-    center = ppifg // 2
+    center = len(data[0]) // 2
 
     # zoomed in data
     zoom = data[:, center - (N_zoom + 0): center + (N_zoom + 1)].astype(float)
