@@ -40,18 +40,31 @@ ul_freq_h2co = 0.20
 ll_freq_co = 0.15
 ul_freq_co = 0.25
 for n in range(N_shocks):
+    # get the data
     co = pc.get_data(path_co, n)
+
+    # throw out data points from the beginning to get down to
+    # integer ppifg
     co, _ = pc.adjust_data_and_reshape(co, ppifg)
     co = co.flatten()
+
+    # find the incident and reflected shock location
     ind_i, ind_r = pc.get_ind_total_to_throw(co, ppifg)
     ind = int(np.round(ind_i / ppifg) * ppifg)
+
+    # truncate it down to 20 shocks before incident and 50 shocks
+    # after reflected
     co = co[ind - ppifg * 20: ind + ppifg * 50]
     co = co.reshape((70, ppifg))
 
+    # phase correct
     p_co = dpc.get_pdiff(co, ppifg, ll_freq_co, ul_freq_co, 200)
     dpc.apply_t0_and_phi0_shift(p_co, co)
     CO[n][:] = co
 
+    # the same thing for h2co except that the shock location
+    # is taken from the co data (the two streams were simultaneously
+    # triggered so this works)
     h2co = pc.get_data(path_h2co, n)
     h2co, _ = pc.adjust_data_and_reshape(h2co, ppifg)
     h2co = h2co.flatten()

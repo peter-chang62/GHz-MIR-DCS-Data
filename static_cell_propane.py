@@ -5,31 +5,28 @@ import scipy.signal as si
 import scipy.constants as sc
 import clipboard_and_style_sheet
 
-# %%
 clipboard_and_style_sheet.style_sheet()
-
-# %%
-# data = np.fromfile(r'D:\ShockTubeData\static cell/no_cell_and_3_5_filter_at200_4998x198850.bin', '<h')
 
 # %%
 ppifg = 198850
 center = ppifg // 2
+data = np.fromfile(r'D:\ShockTubeData\static cell/no_cell_and_3_5_filter_at200_4998x198850.bin', '<h')
+data, _ = pc.adjust_data_and_reshape(data, ppifg)
 
 # %%
-# data, _ = pc.adjust_data_and_reshape(data, ppifg)
+ll_freq, ul_freq = 0.422, 0.45
 
-# %%
-# h = 0
-# step = 500
-# while h < len(data):
-#     sec = data[h: h + step]
-#     sec = np.vstack([data[0], sec])
-#     sec, shifts = pc.Phase_Correct(sec, ppifg, 125, False)
-#
-#     data[h: h + step] = sec[1:]
-#
-#     h += step
-#     print(h)
+h = 0
+step = 500
+while h < len(data):
+    sec = data[h: h + step]
+    sec = np.vstack([data[0], sec])
+    sec, shifts = pc.Phase_Correct(sec, ppifg, 125, False)
+
+    data[h: h + step] = sec[1:]
+
+    h += step
+    print(h)
 
 # %%
 # avg = np.mean(data, 0)
