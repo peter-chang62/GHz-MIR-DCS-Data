@@ -1,8 +1,12 @@
 import numpy as np
-import mkl_fft
 from scipy.signal import windows as wd
 import os
 import matplotlib.pyplot as plt
+
+try:
+    import mkl_fft
+except:
+    mkl_fft = np.fft
 
 
 def fft(x, axis=None):

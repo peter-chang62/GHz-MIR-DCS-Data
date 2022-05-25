@@ -9,9 +9,20 @@ clipboard_and_style_sheet.style_sheet()
 # %%
 ppifg = 17507
 center = ppifg // 2
-# data = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card2_114204x17507.bin', '<h')
-data = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card1_114204x17507.bin', '<h')
+data = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card2_114204x17507.bin', '<h')
+# data = np.fromfile(r'D:\ShockTubeData\04242022_Data\Vacuum_Background/card1_114204x17507.bin', '<h')
 data, _ = pc.adjust_data_and_reshape(data, ppifg)
+
+# %% plot for group meeting show phi_ceo slip
+fig, ax = plt.subplots(1, 1)
+h = 0
+for i in data[::1000]:
+    ax.clear()
+    ax.plot(i[center - 50:center + 50])
+    plt.title(h * 1000)
+    # plt.savefig(f"temp_fig/{h}.png")
+    h += 1
+    plt.pause(.01)
 
 # %%
 ll_freq_h2co = 0.0597
