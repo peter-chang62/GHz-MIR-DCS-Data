@@ -34,8 +34,9 @@ for n in range(N_shocks):
     ind = 1000
     ll, ul = ind_i - ind, ind_r + ind
     ax.clear()
-    ax.plot(bckgnd[ll:ul])
+    ax.plot(co[ll:ul])
     ax.axvline(ind, color='r')
     ax.axvline(ul - ll - ind, color='r')
-    plt.title(N_shocks - n)
-    plt.pause(.001)
+    plt.title(n)
+    # plt.pause(.001)
+    plt.savefig(f'temp_fig/{n}.png')
