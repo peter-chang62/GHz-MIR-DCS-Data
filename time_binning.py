@@ -66,8 +66,8 @@ longest in AVG """
 """from the above plots, you kind of don't want the shock to blur into the interferogram, or else the "longest" delay 
 may actually be the shortest one and vice versa """
 
-IND = IND[1:-1]
-AVG = AVG[1:-1]
+# IND = IND[1:-1]
+# AVG = AVG[1:-1]
 
 # %%
 # should be better now
@@ -84,13 +84,13 @@ AVG = AVG[1:-1]
 # plt.xlim(ppifg * 20 - 1 * ppifg, ppifg * 20 + 1 * ppifg)
 
 # %% just double checking, nice!
-# fig, ax = plt.subplots(1, 1)
-# ll, ul = ppifg * 19, ppifg * 21
-# for i in IND[5]:
-#     ax.clear()
-#     ax.plot(data[i].flatten()[ll:ul])
-#     plt.pause(.01)
+fig, ax = plt.subplots(1, 1)
+ll, ul = ppifg * 19, ppifg * 21
+for i in IND[7]:
+    ax.clear()
+    ax.plot(data[i].flatten()[ll:ul])
+    plt.pause(.01)
 
 # %% save results (make sure to comment out when done!)
-# with open("h2co_surf27_and_28_6timebins.npy", 'wb') as f:
-#     np.save(f, AVG)
+with open("h2co_surf27_and_28_6timebins.npy", 'wb') as f:
+    np.save(f, AVG)
