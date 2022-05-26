@@ -13,16 +13,16 @@ import digital_phase_correction as dpc
 # center = ppifg // 2
 
 # %%
-# path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
-# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
-# ppifg = 17507
-# center = ppifg // 2
-
-# %%
-path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
-path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
+path_co = r'D:\ShockTubeData\04242022_Data\Surf_27\card1/'
+path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_27\card2/'
 ppifg = 17507
 center = ppifg // 2
+
+# %%
+# path_co = r'D:\ShockTubeData\04242022_Data\Surf_28\card1/'
+# path_h2co = r'D:\ShockTubeData\04242022_Data\Surf_28\card2/'
+# ppifg = 17507
+# center = ppifg // 2
 
 """Initialize arrays and specify what interferograms to look at """
 
@@ -39,7 +39,8 @@ ll_freq_h2co = 0.0597
 ul_freq_h2co = 0.20
 ll_freq_co = 0.15
 ul_freq_co = 0.25
-IND = np.zeros(N_shocks)
+IND_I = np.zeros(N_shocks)
+IND_R = np.zeros(N_shocks)
 for n in range(N_shocks):
     # get the data
     co = pc.get_data(path_co, n)
@@ -52,7 +53,8 @@ for n in range(N_shocks):
     # find the incident and reflected shock location
     ind_i, ind_r = pc.get_ind_total_to_throw(co, ppifg)
     ind = int(np.round(ind_i / ppifg) * ppifg)
-    IND[n] = ind - ind_i
+    IND_I[n] = ind_i
+    IND_R[n] = ind_r
 
     # truncate it down to 20 shocks before incident and 50 shocks
     # after reflected
