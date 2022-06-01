@@ -12,18 +12,30 @@ clipboard_and_style_sheet.style_sheet()
 """Vacuum Background """
 # ppifg = 198850
 # center = ppifg // 2
-# data = np.fromfile(r'D:\ShockTubeData\static cell/no_cell_and_3_5_filter_at200_4998x198850.bin', '<h')
+# data = np.fromfile(r'D:\ShockTubeData\static cell/no_cell_and_4_5_filter_at200_4998x198850.bin', '<h')
+# data, _ = pc.adjust_data_and_reshape(data, ppifg)
+
+# ppifg = 199346
+# center = ppifg // 2
+# data = np.fromfile(r'D:\ShockTubeData\static cell/with_cell_vacuum_bckgnd_10030x199346.bin', '<h')
 # data, _ = pc.adjust_data_and_reshape(data, ppifg)
 
 # %%
 """Mixture Data """
+# ppifg = 198850
+# center = ppifg // 2
+# data = np.fromfile(r'D:\ShockTubeData\static cell/cell_with_mixture_and_4_5_filter_at200_4998x198850.bin', '<h')
+# data, _ = pc.adjust_data_and_reshape(data, ppifg)
+
 ppifg = 198850
 center = ppifg // 2
-data = np.fromfile(r'D:\ShockTubeData\static cell/cell_with_mixture_and_3_5_filter_at200_4998x198850.bin', '<h')
+data = np.fromfile(r'D:\ShockTubeData\static cell/cell_with_mixture_10030x198850.bin', '<h')
 data, _ = pc.adjust_data_and_reshape(data, ppifg)
 
 # %%
-ll_freq, ul_freq = 0.425, 0.452
+# ll_freq, ul_freq = 0.425, 0.452  # 3.5 um
+# ll_freq, ul_freq = 0.325, 0.345  # 4.5 um
+ll_freq, ul_freq = 0.325, 0.3545  # no filter
 p = dpc.get_pdiff(data, ll_freq, ul_freq, Nzoom=400)
 h = 0
 step = 250
@@ -43,7 +55,9 @@ freq = np.arange(0, center) * fr
 wl = sc.c * 1e6 / freq
 
 # %%
-ll, ul = np.argmin(abs(wl - 3.6)), np.argmin(abs(wl - 3.3))
+# ll, ul = np.argmin(abs(wl - 3.6)), np.argmin(abs(wl - 3.3))
+# ll, ul = np.argmin(abs(wl - 4.8)), np.argmin(abs(wl - 4.3))
+ll, ul = np.argmin(abs(wl - 5.0)), np.argmin(abs(wl - 3.0))
 
 # %%
 fig = plt.figure()

@@ -1,16 +1,22 @@
 import numpy as np
 import phase_correction as pc
 import scipy.signal as ss
+import matplotlib.pyplot as plt
 
 
 # useful for plotting and determining good apodization window
 # to fit spectral phase
-def get_phase(dat, N_apod):
+def get_phase(dat, N_apod, plot=True, linestyle='-'):
     ppifg = len(dat)
     center = ppifg // 2
     fft = pc.fft(dat[center - N_apod // 2: center + N_apod // 2])
     phase = np.unwrap(np.arctan2(fft.imag, fft.real))
     freq = np.fft.fftshift(np.fft.fftfreq(len(phase)))
+
+    if plot:
+        plt.figure()
+        plt.plot(freq, pc.normalize(phase), linestyle=linestyle)
+        plt.plot(freq, pc.normalize(fft.__abs__()), linestyle=linestyle)
     return freq, phase, fft.__abs__()
 
 
