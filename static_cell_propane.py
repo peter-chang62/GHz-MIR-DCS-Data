@@ -35,7 +35,7 @@ data, _ = pc.adjust_data_and_reshape(data, ppifg)
 # %%
 # ll_freq, ul_freq = 0.425, 0.452  # 3.5 um
 # ll_freq, ul_freq = 0.325, 0.345  # 4.5 um
-ll_freq, ul_freq = 0.325, 0.3545  # no filter
+ll_freq, ul_freq = 0.325, 0.487  # no filter
 p = dpc.get_pdiff(data, ll_freq, ul_freq, Nzoom=400)
 h = 0
 step = 250
@@ -68,38 +68,37 @@ plt.ylabel("a.u.")
 # %%
 """Looking at phase corrected data """
 
-ppifg = 198850
-center = ppifg // 2
-fr = 1010e6 - 10008148.6
-freq = np.arange(0, center) * fr
-wl = sc.c * 1e6 / freq
-ll, ul = np.argmin(abs(wl - 3.6)), np.argmin(abs(wl - 3.3))
 
-data = np.fromfile(r'D:\ShockTubeData\static cell\PHASE_CORRECTED/cell_with_mixture_and_3_5_filter_at200_4997x198850'
-                   r'.bin', '<h')
-bckgnd = np.fromfile(r'D:\ShockTubeData\static cell\PHASE_CORRECTED/no_cell_and_3_5_filter_at200_4997x198850.bin',
-                     '<h')
-data.resize((4997, 198850))
-bckgnd.resize((4997, 198850))
+def get_freq_wl_ll_ul(ppifg):
+    center = ppifg // 2
+    fr = 1010e6 - 10008148.6
+    freq = np.arange(0, center) * fr
+    wl = sc.c * 1e6 / freq
+    ll, ul = np.argmin(abs(wl - 5)), np.argmin(abs(wl - 3))
+    return freq, wl, ll, ul
+
 
 # %%
-data = np.mean(data, 0)
-bckgnd = np.mean(bckgnd, 0)
+data_ = np.fromfile(r'D:\ShockTubedata\static cell\PHASE_CORRECTED/cell_with_mixture_averaged.bin')
+bckgnd = np.fromfile(r'D:\ShockTubedata\static cell\PHASE_CORRECTED/with_cell_vacuum_bckgnd_averaged.bin')
+
+freq1, wl1, ll1, ul1 = get_freq_wl_ll_ul(len(data_))
+freq2, wl2, ll2, ul2 = get_freq_wl_ll_ul(len(bckgnd))
 
 # %%
-fft_data = pc.fft(data)[center:].__abs__()
-fft_bckgnd = pc.fft(bckgnd)[center:].__abs__()
+fft_data_ = pc.fft(data_)[len(data_) // 2:].__abs__()
+fft_bckgnd = pc.fft(bckgnd)[len(bckgnd) // 2:].__abs__()
 
 # %%
 fig = plt.figure()
-plt.plot(wl[ll:ul], fft_data[ll:ul], label='data')
-plt.plot(wl[ll:ul], fft_bckgnd[ll:ul], label='background')
+plt.plot(wl1[ll1:ul1], fft_data_[ll1:ul1], label='data_')
+plt.plot(wl2[ll2:ul2], fft_bckgnd[ll2:ul2], label='background')
 plt.legend(loc='best')
 plt.xlabel("wavelength ($\mathrm{\mu m}$)")
 plt.ylabel("a.u.")
 
 # %%
 fig = plt.figure()
-plt.plot(wl[ll:ul], -np.log(fft_data[ll:ul] / fft_bckgnd[ll:ul]))
+plt.plot(wl[ll:ul], -np.log(fft_data_[ll:ul] / fft_bckgnd[ll:ul]))
 plt.xlabel("wavelength ($\mathrm{\mu m}$)")
 plt.ylabel("a.u.")
