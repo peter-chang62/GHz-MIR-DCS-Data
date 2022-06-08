@@ -14,13 +14,13 @@ interferogram). I'll call these two interferograms ifg_a and ifg_b If ind ~ +- c
 close to a centerburst. If ind ~ - center then the shock occured close to the centerburst of ifg_b, and if ind ~ + 
 center then the shock occurred close to ifg_a """
 
-# %%
+# %%____________________________________________________________________________________________________________________
 ind = np.hstack([
     np.fromfile('ind_minus_indi_surf27.bin'),
     np.fromfile('ind_minus_indi_surf28.bin')
 ])
 
-# %%
+# %%____________________________________________________________________________________________________________________
 Nbins = 4
 step = center // Nbins
 IND = []
@@ -29,7 +29,7 @@ for n in range(-Nbins, Nbins):
 
 """There are roughly 100 interferograms in each bin if split into 8 bins! """
 
-# %%
+# %%____________________________________________________________________________________________________________________
 # data = np.hstack([
 #     np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/CO_499x70x17507.bin'),
 #     np.fromfile(r'D:\ShockTubeData\04242022_Data\Surf_28\PHASE_CORRECTED_DATA/CO_299x70x17507.bin')
@@ -45,7 +45,7 @@ AVG = np.zeros((len(IND), 70, ppifg))
 for n, i in enumerate(IND):
     AVG[n] = np.mean(data[i], axis=0)
 
-# %%
+# %%____________________________________________________________________________________________________________________
 """from here 19 is the closest pre-shock, and 20 is the closest post shock, with time delay ordered from shortest to 
 longest in AVG """
 
@@ -62,14 +62,14 @@ longest in AVG """
 # plt.title("shortest time delay")
 # plt.xlim(ppifg * 20 - 1 * ppifg, ppifg * 20 + 1 * ppifg)
 
-# %%
+# %%____________________________________________________________________________________________________________________
 """from the above plots, you kind of don't want the shock to blur into the interferogram, or else the "longest" delay 
 may actually be the shortest one and vice versa """
 
 # IND = IND[1:-1]
 # AVG = AVG[1:-1]
 
-# %%
+# %%____________________________________________________________________________________________________________________
 # should be better now
 # plt.figure()
 # plt.plot(data[np.argmin(abs(ind - max(ind[IND[-1]])))].flatten())
@@ -83,7 +83,8 @@ may actually be the shortest one and vice versa """
 # plt.title("shortest time delay")
 # plt.xlim(ppifg * 20 - 1 * ppifg, ppifg * 20 + 1 * ppifg)
 
-# %% just double checking, nice!
+# %%____________________________________________________________________________________________________________________
+# just double-checking, nice!
 fig, ax = plt.subplots(1, 1)
 ll, ul = ppifg * 19, ppifg * 21
 for i in IND[7]:
@@ -91,6 +92,7 @@ for i in IND[7]:
     ax.plot(data[i].flatten()[ll:ul])
     plt.pause(.01)
 
-# %% save results (make sure to comment out when done!)
+# %%____________________________________________________________________________________________________________________
+# save results (make sure to comment out when done!)
 with open("h2co_surf27_and_28_6timebins.npy", 'wb') as f:
     np.save(f, AVG)

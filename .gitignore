@@ -1,2 +1,8 @@
 /Data/
 /temp_fig/
+
+.idea/
+
+__pycache__/
+
+temp/
