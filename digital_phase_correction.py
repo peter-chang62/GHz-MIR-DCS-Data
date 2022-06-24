@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # useful for plotting and determining good apodization window
 # to fit spectral phase
-def get_phase(dat, N_apod, plot=True, linestyle='-'):
+def get_phase(dat, N_apod, plot=True):
     ppifg = len(dat)
     center = ppifg // 2
     fft = pc.fft(dat[center - N_apod // 2: center + N_apod // 2])
@@ -15,8 +15,8 @@ def get_phase(dat, N_apod, plot=True, linestyle='-'):
 
     if plot:
         plt.figure()
-        plt.plot(freq, pc.normalize(phase), linestyle=linestyle)
-        plt.plot(freq, pc.normalize(fft.__abs__()), linestyle=linestyle)
+        plt.plot(freq, pc.normalize(phase), '.-')
+        plt.plot(freq, pc.normalize(fft.__abs__()), '.-')
     return freq, phase, fft.__abs__()
 
 
