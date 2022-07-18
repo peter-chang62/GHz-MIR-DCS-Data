@@ -94,7 +94,7 @@ def get_ind_total_to_throw(data, ppifg):
     bckgnd[:, center - 50:center + 50] = 0.0
 
     # switched to trying this instead __________________________________________________________________________________
-    bckgnd = normalize(bckgnd.flatten())
+    bckgnd = bckgnd.flatten()
     ind1 = np.argmax(bckgnd)
     bckgnd_ = bckgnd.copy()
     bckgnd_[ind1 - int(1e4): ind1 + int(1e4)] = 0
