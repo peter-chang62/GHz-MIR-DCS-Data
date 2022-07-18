@@ -12,7 +12,7 @@ def save_npy(path, filename, arr):
 
 # %%____________________________________________________________________________________________________________________
 # data paths
-path = r'/media/peterchang/Samsung_T5/MIR stuff/ShockTubeData/DATA_MATT_PATRICK_TRIP_2/06-30-2022/Battalion_4/'
+path = r'/media/peterchang/Samsung_T5/MIR stuff/ShockTubeData/DATA_MATT_PATRICK_TRIP_2/06-30-2022/Battalion_9/'
 path_co = path + "card1/"
 path_h2co = path + "card2/"
 ppifg = 17506
@@ -83,32 +83,9 @@ for n in range(N_shocks):
     print(N_shocks - n)
 
 # %%____________________________________________________________________________________________________________________
-# Combine shocks: first calculate the average for each shock
-avg_shock_H2CO = np.zeros((N_shocks, ppifg))
-avg_shock_CO = np.zeros((N_shocks, ppifg))
-for n in range(len(H2CO)):
-    avg_shock_H2CO[n] = np.mean(H2CO[n], 0)
-    avg_shock_CO[n] = np.mean(CO[n], 0)
-
-p_avg_shock_H2CO = dpc.get_pdiff(avg_shock_H2CO, ll_freq_h2co, ul_freq_h2co, 200)
-dpc.apply_t0_and_phi0_shift(p_avg_shock_H2CO, avg_shock_H2CO)
-
-p_avg_shock_CO = dpc.get_pdiff(avg_shock_CO, ll_freq_co, ul_freq_co, 200)
-dpc.apply_t0_and_phi0_shift(p_avg_shock_CO, avg_shock_CO)
-
-# %%____________________________________________________________________________________________________________________
-for n in range(len(H2CO)):
-    p = np.repeat(p_avg_shock_H2CO[n][:, np.newaxis], N_ifgs, 1).T
-    dpc.apply_t0_and_phi0_shift(p, H2CO[n])
-
-    p = np.repeat(p_avg_shock_CO[n][:, np.newaxis], N_ifgs, 1).T
-    dpc.apply_t0_and_phi0_shift(p, CO[n])
-
-    print(len(H2CO) - n)
-
-# %%____________________________________________________________________________________________________________________
 # # If you want to save the data
-# save_npy(save_path, f'CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', CO)
-# save_npy(save_path, f'H2CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', H2CO)
-# save_npy(save_path, 'ind_minus_indi.npy', IND_MINUS_INDI)
-# save_npy(save_path, 'ind_minus_indr.npy', IND_MINUS_INDR)
+save_path = path + "PHASE_CORRECTED_DATA/"
+save_npy(save_path, f'CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', CO)
+save_npy(save_path, f'H2CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', H2CO)
+save_npy(save_path, 'ind_minus_indi.npy', IND_MINUS_INDI)
+save_npy(save_path, 'ind_minus_indr.npy', IND_MINUS_INDR)
