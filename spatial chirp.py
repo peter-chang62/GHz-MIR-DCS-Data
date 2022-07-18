@@ -102,7 +102,7 @@ def overlap_integral(w1, w2):
     return 2 * w1 * w2 / (w1 ** 2 + w2 ** 2)
 
 
-# %%
+# %% ___________________________________________________________________________________________________________________
 wl = np.linspace(3e-6, 5e-6, 5000)
 l_freespace_m = np.linspace(.3, 1., 100)
 
@@ -112,7 +112,7 @@ for n, l in enumerate(l_freespace_m):
     D_oap[n] = waist_at_oap_input(wl, l) * 2
     D_fiber[n] = waist_at_fiber_input(wl, f_fiber_coupling, l) * 2
 
-# %%
+# %% ___________________________________________________________________________________________________________________
 y = l_freespace_m * 100
 x = wl * 1e6
 plt.figure()
@@ -122,7 +122,7 @@ plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("distance (cm)")
 plt.title("Diameter at fiber input coupling OAP (mm)")
 
-# %%
+# %% ___________________________________________________________________________________________________________________
 plt.figure()
 plt.pcolormesh(x, y, D_fiber * 1e6, cmap='jet')
 plt.colorbar()
@@ -130,21 +130,21 @@ plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("distance (cm)")
 plt.title("Diameter at fiber input after OAP ($\mathrm{\mu m}$)")
 
-# %%
+# %% ___________________________________________________________________________________________________________________
 plt.figure()
 plt.title("Fiber stated MFD specs")
 plt.plot(MFD().wl_um, MFD().mfd)
 plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("MFD $\mathrm{\mu m}$")
 
-# %%
+# %% ___________________________________________________________________________________________________________________
 plt.figure()
 plt.title("Waist after PPLN OAP Collimator")
 plt.plot(wl * 1e6, waist_at_oap_collimator(wl) * 1e3)
 plt.xlabel("$\mathrm{\lambda \mu m}$")
 plt.ylabel("mm")
 
-# %%
+# %% ___________________________________________________________________________________________________________________
 ll, ul = MFD().wl_um[[0, -1]]
 ind = (wl * 1e6 > ll).nonzero()[0]
 mfd_fiber_data = MFD().grid(wl[ind] * 1e6)

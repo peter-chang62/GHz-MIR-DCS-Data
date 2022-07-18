@@ -1,9 +1,12 @@
 import numpy as np
-import mkl_fft
-import PyQt5.QtWidgets as qt
 from scipy.signal import windows as wd
 import os
 import matplotlib.pyplot as plt
+
+try:
+    import mkl_fft
+except:
+    mkl_fft = np.fft
 
 
 def fft(x, axis=None):
@@ -57,7 +60,7 @@ def get_data(path, N_file):
     key = lambda f: int(f.split('LoopCount_')[1].split('_Datetime')[0])
     names = sorted(names, key=key)
 
-    # %% load a single data file and throw out the time stamp
+    # load a single data file and throw out the time stamp
     data = np.fromfile(path + names[N_file], '<h')
     data = data[:-64]
 
@@ -89,12 +92,22 @@ def get_ind_total_to_throw(data, ppifg):
     bckgnd = np.copy(data)
     # remove all the interferograms
     bckgnd[:, center - 50:center + 50] = 0.0
-    # the first maximum of the baseline gives the incident wave
-    ind_incident = np.argmax(bckgnd.flatten()[:int(3e6)])
-    # clear the incident wave, and look for the reflected one
-    # don't let it look too far, in case there are subsequent shocks from reflection off the far end wall
-    skip = ind_incident + int(1e4)
-    ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
+
+    # switched to trying this instead __________________________________________________________________________________
+    bckgnd = normalize(bckgnd.flatten())
+    ind1 = np.argmax(bckgnd)
+    bckgnd_ = bckgnd.copy()
+    bckgnd_[ind1 - int(1e4): ind1 + int(1e4)] = 0
+    ind2 = np.argmax(bckgnd_)
+    ind_incident, ind_reflected = sorted([ind1, ind2])
+    # switched to trying this instead __________________________________________________________________________________
+
+    # # the first maximum of the baseline gives the incident wave
+    # ind_incident = np.argmax(bckgnd.flatten()[:int(3e6)])
+    # # clear the incident wave, and look for the reflected one
+    # # don't let it look too far, in case there are subsequent shocks from reflection off the far end wall
+    # skip = ind_incident + int(1e4)
+    # ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
 
     # skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
     ind_incident += ind_THREW_OUT + ppifg // 2
@@ -142,7 +155,7 @@ def shift_2d(data, shifts):
     return phase_corr
 
 
-def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
+def t0_correct_via_cross_corr(data, N_zoom=50, plot=True):
     """
     :param data: data as a 2D array
     :param ppifg: points per interferogram
@@ -151,10 +164,10 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
 
     :return: phase corrected data as a 2D array
     """
-    center = ppifg // 2
+    center = len(data[0]) // 2
 
     # zoomed in data
-    zoom = data[:, center - 200: center + 201].astype(float)
+    zoom = data[:, center - (N_zoom + 0): center + (N_zoom + 1)].astype(float)
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
     # appodize to remove f0, use a window of size 50
@@ -200,74 +213,3 @@ def Phase_Correct(data, ppifg, N_zoom=50, plot=True):
         ax[1].set_title("corrected")
 
     return phase_corr, shift
-
-
-"""Not using the functions below anymore """
-
-# def fix_sign(data, ind_ll, ind_ul):
-#     """
-#     :param data: 2D array
-#     :param ind_ll: integer
-#     :param ind_ul: integer
-#
-#     :return: data with signs fixed, 2D array
-#     1D array of signs
-#     """
-#
-#     FFT = fft(data, 1)
-#     DIFF = np.zeros(len(FFT))
-#
-#     # %%
-#     ref = FFT[0]
-#     for n, i in enumerate(FFT):
-#         phase1 = np.unwrap(np.arctan2(ref[ind_ll:ind_ul].imag, ref[ind_ll:ind_ul].real))
-#         phase2 = np.unwrap(np.arctan2(i[ind_ll:ind_ul].imag, i[ind_ll:ind_ul].real))
-#
-#         pfit1 = np.polyfit(np.arange(len(phase1)), phase1, 1)
-#         pfit2 = np.polyfit(np.arange(len(phase2)), phase2, 1)
-#
-#         diff = pfit1 - pfit2
-#
-#         remainder = diff[1] % (2 * np.pi)
-#         sgn = np.where(remainder < np.pi, 1, -1)
-#
-#         i *= sgn
-#         FFT[n] = i
-#         DIFF[n] = sgn  # higher order first
-#
-#     back = ifft(FFT, 1).real
-#     back = (back.T - np.mean(back, 1)).T
-#     return back, DIFF
-#
-#
-# def fix_sign_and_phase_correct(data, ind_ll, ind_ul, ppifg, N_zoom, plot, tries=1):
-#     """
-#     :param data: 2D array
-#     :param ind_ll:
-#     :param ind_ul:
-#     :param ppifg:
-#     :param N_zoom:
-#     :param plot:
-#     :param tries:
-#
-#     :return:
-#     """
-#     SHIFTS = np.zeros(len(data))
-#     SGNS = np.ones(len(data))
-#
-#     assert tries >= 1
-#     assert isinstance(tries, int)
-#
-#     for i in range(tries):
-#         data, sgns = fix_sign(data, ind_ll, ind_ul)
-#         data, shifts = Phase_Correct(data, ppifg, N_zoom, plot=False)
-#
-#         SGNS *= sgns
-#         SHIFTS += shifts
-#
-#     if plot:
-#         center = ppifg // 2
-#         plt.figure()
-#         [plt.plot(i[center - 100:center + 100]) for i in data]
-#
-#     return data, SHIFTS, SGNS
