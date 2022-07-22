@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
 import phase_correction as pc
 import digital_phase_correction as dpc
+from sys import platform
+
+clipboard_and_style_sheet.style_sheet()
 
 
 def save_npy(path, filename, arr):
@@ -10,9 +13,15 @@ def save_npy(path, filename, arr):
         np.save(f, arr)
 
 
+if platform == "win32":  # on windows
+    path_header = "E:\\"
+
+else:  # otherwise on Pop!OS
+    path_header = "/media/peterchang/Samsung_T5/"
+
 # %%____________________________________________________________________________________________________________________
 # data paths
-path = r'/media/peterchang/Samsung_T5/MIR stuff/ShockTubeData/DATA_MATT_PATRICK_TRIP_2/06-30-2022/Battalion_9/'
+path = path_header + r'MIR stuff\ShockTubeData\DATA_MATT_PATRICK_TRIP_2\06-29-2022\Battalion_14/'
 path_co = path + "card1/"
 path_h2co = path + "card2/"
 ppifg = 17506
@@ -37,6 +46,8 @@ IND_MINUS_INDR = np.zeros(N_shocks)
 ref_co = np.load('06302022_batt4_card1_shock1.npy')
 ref_h2co = np.load('06302022_batt4_card2_shock1.npy')
 
+ind_i_for_check = np.zeros(N_shocks)
+
 for n in range(N_shocks):
     # get the data
     co = pc.get_data(path_co, n)
@@ -51,6 +62,7 @@ for n in range(N_shocks):
     ind = int(np.round(ind_i / ppifg) * ppifg)  # based on incident shock!
     IND_MINUS_INDI[n] = ind - ind_i  # important for time binning!
     IND_MINUS_INDR[n] = ind - ind_r  # actually have NOT used this for time binning!
+    ind_i_for_check[n] = ind_i
 
     # truncate it down to 20 shocks before incident and 50 shocks
     # after reflected
@@ -83,9 +95,19 @@ for n in range(N_shocks):
     print(N_shocks - n)
 
 # %%____________________________________________________________________________________________________________________
-# # If you want to save the data
-save_path = path + "PHASE_CORRECTED_DATA/"
-save_npy(save_path, f'CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', CO)
-save_npy(save_path, f'H2CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', H2CO)
-save_npy(save_path, 'ind_minus_indi.npy', IND_MINUS_INDI)
-save_npy(save_path, 'ind_minus_indr.npy', IND_MINUS_INDR)
+# If you want to save the data
+# save_path = path + "PHASE_CORRECTED_DATA/"
+# save_npy(save_path, f'CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', CO)
+# save_npy(save_path, f'H2CO_{CO.shape[0]}x{CO.shape[1]}x{CO.shape[2]}.npy', H2CO)
+# save_npy(save_path, 'ind_minus_indi.npy', IND_MINUS_INDI)
+# save_npy(save_path, 'ind_minus_indr.npy', IND_MINUS_INDR)
+
+# %%____________________________________________________________________________________________________________________
+# verification
+# fig, ax = plt.subplots(1, 1)
+# ax.plot(ind_i_for_check, 'o')
+# avg = np.mean(ind_i_for_check)
+# ax.axhline(avg + center, color='k', linestyle='--', label='ppifg / 2')
+# ax.axhline(avg - center, color='k', linestyle='--')
+# ax.legend(loc='best')
+# ax.set_title("shock location")
