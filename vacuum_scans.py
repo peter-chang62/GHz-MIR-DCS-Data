@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
 import phase_correction as pc
 import digital_phase_correction as dpc
+from sys import platform
 
 
 def save_npy(path, filename, arr):
@@ -10,10 +11,16 @@ def save_npy(path, filename, arr):
         np.save(f, arr)
 
 
+if platform == "win32":  # on windows
+    path_header = "E:\\"
+
+else:  # otherwise on Pop!OS
+    path_header = "/media/peterchang/Samsung_T5/"
+
 # %%____________________________________________________________________________________________________________________
 # data paths
-path = r'/media/peterchang/Samsung_T5/MIR stuff/ShockTubeData/' \
-       r'DATA_MATT_PATRICK_TRIP_2/06-30-2022/Vacuum_Background_end_of_experiment/'
+path = path_header + r'MIR stuff/ShockTubeData/' \
+                     r'DATA_MATT_PATRICK_TRIP_2/06-30-2022/Vacuum_Background_end_of_experiment/'
 ppifg = 17506
 center = ppifg // 2
 
