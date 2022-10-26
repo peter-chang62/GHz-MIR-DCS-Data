@@ -47,7 +47,7 @@ names_co = names_co_surf27 + names_co_surf28
 names_h2co = names_h2co_surf27 + names_h2co_surf28
 
 # ___________________________________________________ save paths _______________________________________________________
-save_path = r"D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA/"
+save_path = r"D:\ShockTubeData\04242022_Data\Surf_27\PHASE_CORRECTED_DATA_SURFS_27_AND_28/"
 save_path_co = save_path + "co_card1/"
 save_path_h2co = save_path + "h2co_card2/"
 
