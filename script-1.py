@@ -232,7 +232,7 @@ ll_freq_h2co, ul_freq_h2co = 0.0791, 0.1686
 
 # _______________________________________ vacuum background h2co _______________________________________________________
 path_vacuum_bckgnd = r"D:\ShockTubeData\04242022_Data\Vacuum_Background/"
-h2co_vacuum_bckgnd = np.fromfile(path_vacuum_bckgnd + "card1_114204x17507.bin", '<h')
+h2co_vacuum_bckgnd = np.fromfile(path_vacuum_bckgnd + "card2_114204x17507.bin", '<h')
 h2co_vacuum_bckgnd = h2co_vacuum_bckgnd / h2co_vacuum_bckgnd.max()
 
 h2co_vacuum_bckgnd = h2co_vacuum_bckgnd[center:-center]
