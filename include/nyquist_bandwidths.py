@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet
 import scipy.constants as sc
 
+
 # clipboard_and_style_sheet.style_sheet()
 
 
@@ -89,48 +90,3 @@ def return_allowed_indices_dnu(dnu, vi, vf):
     ind = np.hstack([np.logical_and(dnu > i[0], dnu < i[1]).nonzero()[0] for i in dnu_windows] + \
                     [(dnu > vf).nonzero()[0]])
     return ind
-
-
-# %%
-# fr = 1e9
-# # nu_start = sc.c / 4.55e-6
-# # nu_end = sc.c / 3.45e-6
-# nu_start = sc.c / 4.4e-6
-# nu_end = sc.c / 3.6e-6
-# allowed_dnu_windows = find_allowed_nyquist_bandwidths(nu_start, nu_end)
-# allowed_dfr_windows = find_allowed_dfr(nu_start, nu_end, fr)
-#
-# dfr = np.linspace(50, fr ** 2 / (2 * (nu_end - nu_start)), 5000)
-# dnu = bandwidth(fr, dfr)
-# ind = return_allowed_indices_dnu(dnu, nu_start, nu_end)
-#
-# x = np.zeros(len(dfr))
-# plt.plot(dfr[ind], x[ind], '.')
-# [plt.axvline(i) for i in allowed_dfr_windows.flatten()]
-# plt.axvline(fr ** 2 / (2 * nu_end))
-#
-# """Given an fr an dfr, we can also calculate the nearest fr, or nearest dfr that would give us an integer ppifg.
-#
-# In the following, fr and dfr do not give an integer ppifg. However, if we change fr -> corr_fr1 or fr -> corr_fr2
-# and keep the same dfr, then we will get an integer ppifg.
-#
-# Likewise, if we change dfr -> corr_dfr1 or dfr -> corr_dfr2 and keep the same fr, then we will get an integer ppifg
-#
-# In the above, the two possible corrected rep rates, or two possible corrected delta freps give ppifg that differ
-# by one.
-#
-# Generally it is easier to apply corrections to dfr, since those corrections are much much smaller than
-# corrections to fr. This is expected since ppifg = fr / dfr and fr >> dfr.
-#
-# Secondly, if applying corrections to dfr it is important that when applying corrections you keep fr1 = fr fixed,
-# and only change fr2 = fr + dfr > fr1 """
-#
-# # fr = 1e9
-# # dfr = 23e3
-# # corr_dfr1, corr_dfr2 = calc_denom_for_mod_cond(fr, dfr)
-# # corr_fr1, corr_fr2 = calc_num_for_mod_cond(fr, dfr)
-# # print("original ppifg: ", fr / dfr)
-# # print("corrected ppifg fr/corr_dfr1 :", fr / corr_dfr1)
-# # print("corrected ppifg fr/corr_dfr2 :", fr / corr_dfr2)
-# # print("corrected ppifg corr_fr1/dfr :", corr_fr1 / dfr)
-# # print("corrected ppifg corr_fr2/dfr :", corr_fr2 / dfr)
