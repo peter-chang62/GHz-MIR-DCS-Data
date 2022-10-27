@@ -138,72 +138,116 @@ shocks analyzed in the previous scripts """
 # np.save(save_path + "IND_SHOCKS.npy", IND_SHOCK)
 
 # _______________________________________ average shocks together ______________________________________________________
-path_corrected = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28\PHASE_CORRECTED_BATT_28_AND_31/"
-path_co_corrected = path_corrected + "co_card1/"
-path_h2co_corrected = path_corrected + "h2co_card2/"
-names_co_corrected = [i.name for i in os.scandir(path_co_corrected)]
-names_h2co_corrected = [i.name for i in os.scandir(path_h2co_corrected)]
+# path_corrected = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28\PHASE_CORRECTED_BATT_28_AND_31/"
+# path_co_corrected = path_corrected + "co_card1/"
+# path_h2co_corrected = path_corrected + "h2co_card2/"
+# names_co_corrected = [i.name for i in os.scandir(path_co_corrected)]
+# names_h2co_corrected = [i.name for i in os.scandir(path_h2co_corrected)]
+#
+# key = lambda s: float(s.split(".npy")[0])
+# names_co_corrected.sort(key=key)
+# names_h2co_corrected.sort(key=key)
+# names_co_corrected = [path_co_corrected + i for i in names_co_corrected]
+# names_h2co_corrected = [path_h2co_corrected + i for i in names_h2co_corrected]
+#
+# ind_shocks = np.load(path_corrected + "IND_SHOCKS.npy")
+# ppifg_shock_ref = ind_shocks.min() // ppifg
+#
+# for n, i in enumerate(ind_shocks):
+#     ppifg_shock = i // ppifg
+#     ppifg_diff = ppifg_shock_ref - ppifg_shock
+#
+#     if n == 0:
+#         co = np.load(names_co_corrected[n])
+#         if ppifg_diff < 0:
+#             co = co[abs(ppifg_diff):]
+#         elif ppifg_diff > 0:
+#             assert ppifg_diff < 0, "this shouldn't happen"
+#             co = co[:ppifg_diff]
+#
+#         # ____________________________________________________________________________________________________________
+#         h2co = np.load(names_h2co_corrected[n])
+#         if ppifg_diff < 0:
+#             h2co = h2co[abs(ppifg_diff):]
+#         elif ppifg_diff > 0:
+#             assert ppifg_diff < 0, "this shouldn't happen"
+#             h2co = h2co[:ppifg_diff]
+#
+#     else:
+#         x = np.load(names_co_corrected[n])
+#         if ppifg_diff < 0:
+#             x = x[abs(ppifg_diff):]
+#         elif ppifg_diff > 0:
+#             assert ppifg_diff < 0, "this shouldn't happen"
+#             x = x[:ppifg_diff]
+#
+#         if len(co) > len(x):
+#             co = co[:len(x)] + x
+#         elif len(co) < len(x):
+#             co += x[:len(co)]
+#         else:
+#             co += x
+#
+#         # ____________________________________________________________________________________________________________
+#         y = np.load(names_h2co_corrected[n])
+#         if ppifg_diff < 0:
+#             y = y[abs(ppifg_diff):]
+#         elif ppifg_diff > 0:
+#             assert ppifg_diff < 0, "this shouldn't happen"
+#             y = y[:ppifg_diff]
+#
+#         if len(h2co) > len(y):
+#             h2co = h2co[:len(y)] + y
+#         elif len(h2co) < len(y):
+#             h2co += y[:len(h2co)]
+#         else:
+#             h2co += y
+#
+#     print(len(names_co_corrected) - n - 1)
+#
+# np.save(path_corrected + "co_averaged_batt_28_and_31.npy", co)
+# np.save(path_corrected + "h2co_averaged_batt_28_and_31.npy", h2co)
 
-key = lambda s: float(s.split(".npy")[0])
-names_co_corrected.sort(key=key)
-names_h2co_corrected.sort(key=key)
-names_co_corrected = [path_co_corrected + i for i in names_co_corrected]
-names_h2co_corrected = [path_h2co_corrected + i for i in names_h2co_corrected]
+# _______________________________________ vacuum background co _________________________________________________________
+# path_vacuum_bckgnd = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Vacuum_Background_end_of_experiment/"
+# path_bckgnd_co = path_vacuum_bckgnd + "4.5um_filter_114204x17506.bin"
+#
+# co_bckgnd = np.fromfile(path_bckgnd_co, '<h')
+# co_bckgnd = co_bckgnd / co_bckgnd.max()
+#
+# co_bckgnd = co_bckgnd[center:-center]
+# co_bckgnd = co_bckgnd[:len(co_bckgnd) // ppifg * ppifg]
+# co_bckgnd = np.reshape(co_bckgnd, (114204 - 1, ppifg))
+#
+# pdiff_co = dpc.get_pdiff(co_bckgnd, ll_freq_co, ul_freq_co, 200)
+# h = 0
+# step = 250
+# while h < len(co_bckgnd):
+#     dpc.apply_t0_and_phi0_shift(pdiff_co[h: h + step], co_bckgnd[h: h + step])
+#     h += step
+#     print(len(co_bckgnd) - h)
+#
+# avg_co_bckgnd = np.sum(co_bckgnd, axis=0)
+# np.save(path_vacuum_bckgnd + "PHASE_CORRECTED/co_vacuum_bckgnd_avg.npy", avg_co_bckgnd)
 
-ind_shocks = np.load(path_corrected + "IND_SHOCKS.npy")
-ppifg_shock_ref = ind_shocks.min() // ppifg
+# _______________________________________ vacuum background h2co _______________________________________________________
+path_vacuum_bckgnd = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Vacuum_Background_end_of_experiment/"
+path_bckgnd_h2co = path_vacuum_bckgnd + "3.5um_filter_114204x17506.bin"
 
-for n, i in enumerate(ind_shocks):
-    ppifg_shock = i // ppifg
-    ppifg_diff = ppifg_shock_ref - ppifg_shock
+h2co_bckgnd = np.fromfile(path_bckgnd_h2co, '<h')
+h2co_bckgnd = h2co_bckgnd / h2co_bckgnd.max()
 
-    if n == 0:
-        co = np.load(names_co_corrected[n])
-        if ppifg_diff < 0:
-            co = co[abs(ppifg_diff):]
-        elif ppifg_diff > 0:
-            assert ppifg_diff < 0, "this shouldn't happen"
-            co = co[:ppifg_diff]
+h2co_bckgnd = h2co_bckgnd[center:-center]
+h2co_bckgnd = h2co_bckgnd[:len(h2co_bckgnd) // ppifg * ppifg]
+h2co_bckgnd = np.reshape(h2co_bckgnd, (114204 - 1, ppifg))
 
-        # ____________________________________________________________________________________________________________
-        h2co = np.load(names_h2co_corrected[n])
-        if ppifg_diff < 0:
-            h2co = h2co[abs(ppifg_diff):]
-        elif ppifg_diff > 0:
-            assert ppifg_diff < 0, "this shouldn't happen"
-            h2co = h2co[:ppifg_diff]
+pdiff_h2co = dpc.get_pdiff(h2co_bckgnd, ll_freq_h2co, ul_freq_h2co, 200)
+h = 0
+step = 250
+while h < len(h2co_bckgnd):
+    dpc.apply_t0_and_phi0_shift(pdiff_h2co[h: h + step], h2co_bckgnd[h: h + step])
+    h += step
+    print(len(h2co_bckgnd) - h)
 
-    else:
-        x = np.load(names_co_corrected[n])
-        if ppifg_diff < 0:
-            x = x[abs(ppifg_diff):]
-        elif ppifg_diff > 0:
-            assert ppifg_diff < 0, "this shouldn't happen"
-            x = x[:ppifg_diff]
-
-        if len(co) > len(x):
-            co = co[:len(x)] + x
-        elif len(co) < len(x):
-            co += x[:len(co)]
-        else:
-            co += x
-
-        # ____________________________________________________________________________________________________________
-        y = np.load(names_h2co_corrected[n])
-        if ppifg_diff < 0:
-            y = y[abs(ppifg_diff):]
-        elif ppifg_diff > 0:
-            assert ppifg_diff < 0, "this shouldn't happen"
-            y = y[:ppifg_diff]
-
-        if len(h2co) > len(y):
-            h2co = h2co[:len(y)] + y
-        elif len(h2co) < len(y):
-            h2co += y[:len(h2co)]
-        else:
-            h2co += y
-
-    print(len(names_co_corrected) - n - 1)
-
-np.save(path_corrected + "co_averaged_batt_28_and_31.npy", co)
-np.save(path_corrected + "h2co_averaged_batt_28_and_31.npy", h2co)
+avg_h2co_bckgnd = np.sum(h2co_bckgnd, axis=0)
+np.save(path_vacuum_bckgnd + "PHASE_CORRECTED/h2co_vacuum_bckgnd_avg.npy", avg_h2co_bckgnd)
