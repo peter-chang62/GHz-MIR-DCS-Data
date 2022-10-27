@@ -27,33 +27,33 @@ path_batt_8 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_8/"
 path_batt_8_co = path_batt_8 + "card1/"
 path_batt_8_h2co = path_batt_8 + "card2/"
 
-path_batt_5 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4/"
-path_batt_5_co = path_batt_5 + "card1/"
-path_batt_5_h2co = path_batt_5 + "card2/"
+path_batt_9 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_9/"
+path_batt_9_co = path_batt_9 + "card1/"
+path_batt_9_h2co = path_batt_9 + "card2/"
 
 # load co (card 1) path names
 names_co_batt_8 = [i.name for i in os.scandir(path_batt_8_co)]
-names_co_batt_5 = [i.name for i in os.scandir(path_batt_5_co)]
+names_co_batt_9 = [i.name for i in os.scandir(path_batt_9_co)]
 names_co_batt_8.sort(key=key)
-names_co_batt_5.sort(key=key)
+names_co_batt_9.sort(key=key)
 
 names_co_batt_8 = [path_batt_8_co + i for i in names_co_batt_8]
-names_co_batt_5 = [path_batt_5_co + i for i in names_co_batt_5]
+names_co_batt_9 = [path_batt_9_co + i for i in names_co_batt_9]
 
 # load co (card 2) path names
 names_h2co_batt_8 = [i.name for i in os.scandir(path_batt_8_h2co)]
-names_h2co_batt_5 = [i.name for i in os.scandir(path_batt_5_h2co)]
+names_h2co_batt_9 = [i.name for i in os.scandir(path_batt_9_h2co)]
 names_h2co_batt_8.sort(key=key)
-names_h2co_batt_5.sort(key=key)
+names_h2co_batt_9.sort(key=key)
 
 names_h2co_batt_8 = [path_batt_8_h2co + i for i in names_h2co_batt_8]
-names_h2co_batt_5 = [path_batt_5_h2co + i for i in names_h2co_batt_5]
+names_h2co_batt_9 = [path_batt_9_h2co + i for i in names_h2co_batt_9]
 
-names_co = names_co_batt_8 + names_co_batt_5
-names_h2co = names_h2co_batt_8 + names_h2co_batt_5
+names_co = names_co_batt_8 + names_co_batt_9
+names_h2co = names_h2co_batt_8 + names_h2co_batt_9
 
 # ___________________________________________________ save paths _______________________________________________________
-save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4\PHASE_CORRECTED_BATT_4_AND_5/"
+save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_8\PHASE_CORRECTED_BATT_8_AND_9/"
 save_path_co = save_path + "co_card1/"
 save_path_h2co = save_path + "h2co_card2/"
 
@@ -61,7 +61,6 @@ save_path_h2co = save_path + "h2co_card2/"
 IND_SHOCK = []
 
 N_shocks = len(names_co)
-# N_shocks = 2
 for i in range(N_shocks):
     co = np.fromfile(names_co[i], '<h')[:-64]
     co = co / co.max()

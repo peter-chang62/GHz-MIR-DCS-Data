@@ -61,7 +61,6 @@ save_path_h2co = save_path + "h2co_card2/"
 IND_SHOCK = []
 
 N_shocks = len(names_co)
-# N_shocks = 2
 for i in range(N_shocks):
     co = np.fromfile(names_co[i], '<h')[:-64]
     co = co / co.max()
