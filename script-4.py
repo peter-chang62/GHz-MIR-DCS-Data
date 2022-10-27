@@ -1,4 +1,4 @@
-"""June 30, 2022: battalions (4, 5) """
+"""June 30, 2022: battalions (28, 31) """
 
 import sys
 
@@ -23,41 +23,45 @@ ll_freq_co, ul_freq_co = 0.1549, 0.2211
 ll_freq_h2co, ul_freq_h2co = 0.0791, 0.1686
 
 # _________________________________________________________ load path names ____________________________________________
-path_batt_4 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4/"
-path_batt_4_co = path_batt_4 + "card1/"
-path_batt_4_h2co = path_batt_4 + "card2/"
+path_batt_28 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28/"
+path_batt_28_co = path_batt_28 + "card1/"
+path_batt_28_h2co = path_batt_28 + "card2/"
 
-path_batt_5 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_5/"
-path_batt_5_co = path_batt_5 + "card1/"
-path_batt_5_h2co = path_batt_5 + "card2/"
+path_batt_31 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_31/"
+path_batt_31_co = path_batt_31 + "card1/"
+path_batt_31_h2co = path_batt_31 + "card2/"
 
 # load co (card 1) path names
-names_co_batt_4 = [i.name for i in os.scandir(path_batt_4_co)]
-names_co_batt_5 = [i.name for i in os.scandir(path_batt_5_co)]
-names_co_batt_4.sort(key=key)
-names_co_batt_5.sort(key=key)
+names_co_batt_28 = [i.name for i in os.scandir(path_batt_28_co)]
+names_co_batt_31 = [i.name for i in os.scandir(path_batt_31_co)]
+names_co_batt_28.sort(key=key)
+names_co_batt_31.sort(key=key)
 
-names_co_batt_4 = [path_batt_4_co + i for i in names_co_batt_4]
-names_co_batt_5 = [path_batt_5_co + i for i in names_co_batt_5]
+names_co_batt_28 = [path_batt_28_co + i for i in names_co_batt_28]
+names_co_batt_31 = [path_batt_31_co + i for i in names_co_batt_31]
 
 # load co (card 2) path names
-names_h2co_batt_4 = [i.name for i in os.scandir(path_batt_4_h2co)]
-names_h2co_batt_5 = [i.name for i in os.scandir(path_batt_5_h2co)]
-names_h2co_batt_4.sort(key=key)
-names_h2co_batt_5.sort(key=key)
+names_h2co_batt_28 = [i.name for i in os.scandir(path_batt_28_h2co)]
+names_h2co_batt_31 = [i.name for i in os.scandir(path_batt_31_h2co)]
+names_h2co_batt_28.sort(key=key)
+names_h2co_batt_31.sort(key=key)
 
-names_h2co_batt_4 = [path_batt_4_h2co + i for i in names_h2co_batt_4]
-names_h2co_batt_5 = [path_batt_5_h2co + i for i in names_h2co_batt_5]
+names_h2co_batt_28 = [path_batt_28_h2co + i for i in names_h2co_batt_28]
+names_h2co_batt_31 = [path_batt_31_h2co + i for i in names_h2co_batt_31]
 
-names_co = names_co_batt_4 + names_co_batt_5
-names_h2co = names_h2co_batt_4 + names_h2co_batt_5
+names_co = names_co_batt_28 + names_co_batt_31
+names_h2co = names_h2co_batt_28 + names_h2co_batt_31
 
 # ___________________________________________________ save paths _______________________________________________________
-save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4\PHASE_CORRECTED_BATT_4_AND_5/"
+save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28\PHASE_CORRECTED_BATT_28_AND_31/"
 save_path_co = save_path + "co_card1/"
 save_path_h2co = save_path + "h2co_card2/"
 
 # _______________________________________ analysis _____________________________________________________________________
+"""different from the previous scripts, to get the incident shock now, I need to find the incident one first and then 
+tell it to search for the shock after that. I think this is because the shocks here were a little weaker than the 
+shocks analyzed in the previous scripts """
+
 IND_SHOCK = []
 
 N_shocks = len(names_co)
@@ -84,8 +88,9 @@ for i in range(N_shocks):
     for n, m in enumerate(ft_filtered):
         ft_filtered[n] = np.where(abs(f_MHz) < 5, m, 0)
     bckgnd = pc.ifft(ft_filtered, axis=1).real.flatten()
+    ind_incident = np.argmax(bckgnd)
     bckgnd_flipped = bckgnd * -1  # get the reflected shock
-    ind_shock = np.argmax(bckgnd_flipped)
+    ind_shock = np.argmax(bckgnd_flipped[ind_incident:]) + ind_incident
 
     # phase correction
     if i > 0:

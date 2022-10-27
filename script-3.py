@@ -1,4 +1,4 @@
-"""June 30, 2022: battalions (8, 9), (28, 29) """
+"""June 30, 2022: battalions (8, 9) """
 
 import sys
 
