@@ -1,0 +1,18 @@
+Hi Peter,
+
+In order to finalize the results for the shock tube paper, I need to plot data as far out after the shock that we have data for.
+
+Also, we want to see if we can plot Trioxane and/or Iodoethane before the shocks. What this means is that we need to look at all the IGs.
+
+could you please phase correct all IGs for the following data runs and the location of the shocks?
+
+    June 30th, Batt 4&5				: script-1.py
+    June 30th, Batt 8&29			: script-2.py
+    June 30th, Batt.   28 & 29		: script-3.py
+    April 24th, surf 27&28 			: script-4.py
+
+I know it’s a lot of data to process, but if you could get me these by Wednesday would be great. We need to wrap this up and start writing soon 😊
+
+Thanks,
+
+Nazanin
