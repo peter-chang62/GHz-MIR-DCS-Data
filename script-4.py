@@ -22,7 +22,7 @@ freq_nounit = np.fft.fftshift(np.fft.fftfreq(ppifg))
 ll_freq_co, ul_freq_co = 0.1549, 0.2211
 ll_freq_h2co, ul_freq_h2co = 0.0791, 0.1686
 
-# _________________________________________________________ load path names ____________________________________________
+# ___________________ load path names _________________________________________
 path_batt_28 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28/"
 path_batt_28_co = path_batt_28 + "card1/"
 path_batt_28_h2co = path_batt_28 + "card2/"
@@ -52,15 +52,17 @@ names_h2co_batt_31 = [path_batt_31_h2co + i for i in names_h2co_batt_31]
 names_co = names_co_batt_28 + names_co_batt_31
 names_h2co = names_h2co_batt_28 + names_h2co_batt_31
 
-# ___________________________________________________ save paths _______________________________________________________
-save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28\PHASE_CORRECTED_BATT_28_AND_31/"
+# ____________________________ save paths _____________________________________
+save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28" \
+            r"\PHASE_CORRECTED_BATT_28_AND_31/"
 save_path_co = save_path + "co_card1/"
 save_path_h2co = save_path + "h2co_card2/"
 
-# _______________________________________ analysis _____________________________________________________________________
-"""different from the previous scripts, to get the incident shock now, I need to find the incident one first and then 
-tell it to search for the shock after that. I think this is because the shocks here were a little weaker than the 
-shocks analyzed in the previous scripts """
+# ____________________ analysis _______________________________________________
+"""different from the previous scripts, to get the incident shock now, 
+I need to find the incident one first and then tell it to search for the 
+shock after that. I think this is because the shocks here were a little 
+weaker than the shocks analyzed in the previous scripts"""
 
 # IND_SHOCK = []
 #
@@ -110,7 +112,7 @@ shocks analyzed in the previous scripts """
 #     IND_SHOCK.append(ind_shock)
 #     np.save(save_path_co + f"{i}.npy", hbt)
 #
-#     # ____________________________ repeat for h2co but use co shock location and data truncation _____________________
+#     # _____ repeat for h2co but use co shock location and data truncation ___
 #     h2co = np.fromfile(names_h2co[i], '<h')[:-64]
 #     h2co = h2co / h2co.max()
 #
@@ -137,8 +139,9 @@ shocks analyzed in the previous scripts """
 #
 # np.save(save_path + "IND_SHOCKS.npy", IND_SHOCK)
 
-# _______________________________________ average shocks together ______________________________________________________
-# path_corrected = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28\PHASE_CORRECTED_BATT_28_AND_31/"
+# _______________________________________ average shocks together _____________
+# path_corrected = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_28" \
+#                  r"\PHASE_CORRECTED_BATT_28_AND_31/"
 # path_co_corrected = path_corrected + "co_card1/"
 # path_h2co_corrected = path_corrected + "h2co_card2/"
 # names_co_corrected = [i.name for i in os.scandir(path_co_corrected)]
@@ -165,7 +168,7 @@ shocks analyzed in the previous scripts """
 #             assert ppifg_diff < 0, "this shouldn't happen"
 #             co = co[:ppifg_diff]
 #
-#         # ____________________________________________________________________________________________________________
+#         # ___________________________________________________________________
 #         h2co = np.load(names_h2co_corrected[n])
 #         if ppifg_diff < 0:
 #             h2co = h2co[abs(ppifg_diff):]
@@ -188,7 +191,7 @@ shocks analyzed in the previous scripts """
 #         else:
 #             co += x
 #
-#         # ____________________________________________________________________________________________________________
+#         # ___________________________________________________________________
 #         y = np.load(names_h2co_corrected[n])
 #         if ppifg_diff < 0:
 #             y = y[abs(ppifg_diff):]
@@ -208,8 +211,9 @@ shocks analyzed in the previous scripts """
 # np.save(path_corrected + "co_averaged_batt_28_and_31.npy", co)
 # np.save(path_corrected + "h2co_averaged_batt_28_and_31.npy", h2co)
 
-# _______________________________________ vacuum background co _________________________________________________________
-# path_vacuum_bckgnd = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Vacuum_Background_end_of_experiment/"
+# _____________________ vacuum background co __________________________________
+# path_vacuum_bckgnd = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022" \
+#                      r"\Vacuum_Background_end_of_experiment/"
 # path_bckgnd_co = path_vacuum_bckgnd + "4.5um_filter_114204x17506.bin"
 #
 # co_bckgnd = np.fromfile(path_bckgnd_co, '<h')
@@ -228,10 +232,12 @@ shocks analyzed in the previous scripts """
 #     print(len(co_bckgnd) - h)
 #
 # avg_co_bckgnd = np.sum(co_bckgnd, axis=0)
-# np.save(path_vacuum_bckgnd + "PHASE_CORRECTED/co_vacuum_bckgnd_avg.npy", avg_co_bckgnd)
+# np.save(path_vacuum_bckgnd + "PHASE_CORRECTED/co_vacuum_bckgnd_avg.npy",
+#         avg_co_bckgnd)
 
-# _______________________________________ vacuum background h2co _______________________________________________________
-path_vacuum_bckgnd = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Vacuum_Background_end_of_experiment/"
+# _______________________ vacuum background h2co ______________________________
+path_vacuum_bckgnd = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022" \
+                     r"\Vacuum_Background_end_of_experiment/"
 path_bckgnd_h2co = path_vacuum_bckgnd + "3.5um_filter_114204x17506.bin"
 
 h2co_bckgnd = np.fromfile(path_bckgnd_h2co, '<h')
@@ -245,9 +251,11 @@ pdiff_h2co = dpc.get_pdiff(h2co_bckgnd, ll_freq_h2co, ul_freq_h2co, 200)
 h = 0
 step = 250
 while h < len(h2co_bckgnd):
-    dpc.apply_t0_and_phi0_shift(pdiff_h2co[h: h + step], h2co_bckgnd[h: h + step])
+    dpc.apply_t0_and_phi0_shift(pdiff_h2co[h: h + step],
+                                h2co_bckgnd[h: h + step])
     h += step
     print(len(h2co_bckgnd) - h)
 
 avg_h2co_bckgnd = np.sum(h2co_bckgnd, axis=0)
-np.save(path_vacuum_bckgnd + "PHASE_CORRECTED/h2co_vacuum_bckgnd_avg.npy", avg_h2co_bckgnd)
+np.save(path_vacuum_bckgnd + "PHASE_CORRECTED/h2co_vacuum_bckgnd_avg.npy",
+        avg_h2co_bckgnd)
