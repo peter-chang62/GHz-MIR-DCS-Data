@@ -4,3 +4,5 @@
 include/__pycache__/
 
 .idea/
+
+.spyproject/

@@ -22,7 +22,7 @@ freq_nounit = np.fft.fftshift(np.fft.fftfreq(ppifg))
 ll_freq_co, ul_freq_co = 0.1549, 0.2211
 ll_freq_h2co, ul_freq_h2co = 0.0791, 0.1686
 
-# _________________________________________________________ load path names ____________________________________________
+# %% load path names
 path_batt_4 = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4/"
 path_batt_4_co = path_batt_4 + "card1/"
 path_batt_4_h2co = path_batt_4 + "card2/"
@@ -52,12 +52,12 @@ names_h2co_batt_5 = [path_batt_5_h2co + i for i in names_h2co_batt_5]
 names_co = names_co_batt_4 + names_co_batt_5
 names_h2co = names_h2co_batt_4 + names_h2co_batt_5
 
-# ___________________________________________________ save paths _______________________________________________________
+# %% save paths
 save_path = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4\PHASE_CORRECTED_BATT_4_AND_5/"
 save_path_co = save_path + "co_card1/"
 save_path_h2co = save_path + "h2co_card2/"
 
-# _______________________________________ analysis _____________________________________________________________________
+# %% analysis
 # IND_SHOCK = []
 #
 # N_shocks = len(names_co)
@@ -105,7 +105,7 @@ save_path_h2co = save_path + "h2co_card2/"
 #     IND_SHOCK.append(ind_shock)
 #     np.save(save_path_co + f"{i}.npy", hbt)
 #
-#     # ____________________________ repeat for h2co but use co shock location and data truncation _____________________
+#     # repeat for h2co but use co shock location and data truncation
 #     h2co = np.fromfile(names_h2co[i], '<h')[:-64]
 #     h2co = h2co / h2co.max()
 #
@@ -132,7 +132,7 @@ save_path_h2co = save_path + "h2co_card2/"
 #
 # np.save(save_path + "IND_SHOCKS.npy", IND_SHOCK)
 
-# _______________________________________ average shocks together ______________________________________________________
+# %% average shocks together
 path_corrected = r"D:\DATA_MATT_PATRICK_TRIP_2\06-30-2022\Battalion_4\PHASE_CORRECTED_BATT_4_AND_5/"
 path_co_corrected = path_corrected + "co_card1/"
 path_h2co_corrected = path_corrected + "h2co_card2/"
@@ -160,7 +160,7 @@ for n, i in enumerate(ind_shocks):
             assert ppifg_diff < 0, "this shouldn't happen"
             co = co[:ppifg_diff]
 
-        # ____________________________________________________________________________________________________________
+        # _____________________________________________________________________
         h2co = np.load(names_h2co_corrected[n])
         if ppifg_diff < 0:
             h2co = h2co[abs(ppifg_diff):]
@@ -183,7 +183,7 @@ for n, i in enumerate(ind_shocks):
         else:
             co += x
 
-        # ____________________________________________________________________________________________________________
+        # _____________________________________________________________________
         y = np.load(names_h2co_corrected[n])
         if ppifg_diff < 0:
             y = y[abs(ppifg_diff):]
