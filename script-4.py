@@ -61,10 +61,12 @@ save_path_co = save_path + "co_card1/"
 save_path_h2co = save_path + "h2co_card2/"
 
 # %% analysis
-"""different from the previous scripts, to get the incident shock now, 
-I need to find the incident one first and then tell it to search for the 
-shock after that. I think this is because the shocks here were a little 
-weaker than the shocks analyzed in the previous scripts"""
+"""
+different from the previous scripts, to get the incident shock now, I need to
+find the incident one first and then tell it to search for the shock after
+that. I think this is because the shocks here were a little weaker than the
+shocks analyzed in the previous scripts
+"""
 
 # IND_SHOCK = []
 
