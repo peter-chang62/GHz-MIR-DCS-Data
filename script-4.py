@@ -258,7 +258,7 @@ h = 0
 step = 250
 while h < len(h2co_bckgnd):
     dpc.apply_t0_and_phi0_shift(
-        pdiff_h2co[h : h + step], h2co_bckgnd[h : h + step]
+        pdiff_h2co[h: h + step], h2co_bckgnd[h: h + step]
     )
     h += step
     print(len(h2co_bckgnd) - h)

@@ -191,7 +191,7 @@ def apply_t0_and_phi0_shift(pdiff, data, return_new=False):
     hbt = ss.hilbert(td)
     apply_phi0_shift(pdiff, hbt)
     hbt = hbt.real
-    
+
     if return_new:
         return hbt
     else:
