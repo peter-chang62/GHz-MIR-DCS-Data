@@ -8,3 +8,5 @@ include/__pycache__/
 .spyproject/
 
 .vscode/
+
+__pycache__/
